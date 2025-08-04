@@ -3,7 +3,7 @@ import { useHealthStatus, useJobDashboard } from '../hooks';
 import { LoadingSpinner } from '../components';
 
 const Dashboard: React.FC = () => {
-  const { status, isHealthy, canCreateJobs, isLoading: healthLoading } = useHealthStatus();
+  const { canCreateJobs } = useHealthStatus();
   const { 
     activeCount, 
     completedCount, 
