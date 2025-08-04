@@ -1,4 +1,5 @@
 import React from 'react';
+import { JobForm } from '../components/forms';
 
 const CreateJob: React.FC = () => {
   return (
@@ -10,9 +11,7 @@ const CreateJob: React.FC = () => {
         </p>
       </div>
       
-      <div className="bg-white shadow rounded-lg p-6">
-        <p className="text-gray-500">Job creation form will be implemented in a future task.</p>
-      </div>
+      <JobForm />
     </div>
   );
 };

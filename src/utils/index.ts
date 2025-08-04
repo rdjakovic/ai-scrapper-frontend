@@ -62,17 +62,17 @@ export const isValidSelector = (selector: string): boolean => {
 export const getStatusColor = (status: string): string => {
   switch (status) {
     case 'completed':
-      return 'text-success-600 bg-success-50';
+      return 'text-green-600 bg-green-50';
     case 'running':
     case 'in_progress':
-      return 'text-primary-600 bg-primary-50';
+      return 'text-blue-600 bg-blue-50';
     case 'failed':
-      return 'text-error-600 bg-error-50';
+      return 'text-red-600 bg-red-50';
     case 'cancelled':
       return 'text-gray-600 bg-gray-50';
     case 'pending':
     default:
-      return 'text-warning-600 bg-warning-50';
+      return 'text-yellow-600 bg-yellow-50';
   }
 };
 
