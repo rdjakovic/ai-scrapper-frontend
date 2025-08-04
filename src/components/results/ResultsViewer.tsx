@@ -89,7 +89,7 @@ export const ResultsViewer: React.FC<ResultsViewerProps> = ({
             </button>
           )}
           
-          <ExportButton data={jobResult.data} jobId={jobResult.job_id} />
+          <ExportButton data={jobResult.data} jobId={jobResult.job_id} jobResult={jobResult} />
         </div>
       </div>
 

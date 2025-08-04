@@ -81,3 +81,6 @@ export * from './errorHandling';
 
 // Export validation utilities
 export * from './validation';
+
+// Export data export utilities
+export * from './exportUtils';
