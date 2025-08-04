@@ -21,7 +21,7 @@ export { default as FormField } from './FormField';
 export { default as ValidationMessage } from './ValidationMessage';
 
 // Layout components
-export { AppLayout, Header, Sidebar } from './layout';
+export { AppLayout, Header, Sidebar, Breadcrumb } from './layout';
 
 // Form components
 export { JobForm, UrlInput, SelectorBuilder, AdvancedOptions } from './forms';

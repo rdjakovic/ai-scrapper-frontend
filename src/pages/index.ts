@@ -5,3 +5,4 @@ export { default as Jobs } from './Jobs';
 export { JobDetail } from './JobDetail';
 export { default as Results } from './Results';
 export { default as Health } from './Health';
+export { default as NotFound } from './NotFound';

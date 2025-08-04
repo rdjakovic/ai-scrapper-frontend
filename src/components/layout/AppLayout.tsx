@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import Breadcrumb from './Breadcrumb';
 import { FocusManager } from '../../utils/accessibility';
 
 interface AppLayoutProps {
@@ -106,6 +107,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             mx-auto
             ${isMobile ? 'max-w-full' : 'max-w-7xl'}
           `}>
+            {/* Breadcrumb Navigation */}
+            <div className="mb-6">
+              <Breadcrumb />
+            </div>
+            
             {children || <Outlet />}
           </div>
         </main>
