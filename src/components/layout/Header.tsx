@@ -1,6 +1,5 @@
 import React from 'react';
-import { useHealthStatus } from '../../hooks';
-import { createStatusAria } from '../../utils/accessibility';
+import HealthIndicator from '../HealthIndicator';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -13,13 +12,6 @@ const Header: React.FC<HeaderProps> = ({
   sidebarOpen = false, 
   isMobile = false 
 }) => {
-  const { isHealthy, isLoading: healthLoading } = useHealthStatus();
-
-  const healthStatus = healthLoading ? 'info' : (isHealthy ? 'success' : 'error');
-  const healthMessage = healthLoading ? 'Checking API status' : 
-                       (isHealthy ? 'API is healthy' : 'API is unavailable');
-
-  const healthAria = createStatusAria(healthStatus, healthMessage);
 
   return (
     <header 
@@ -71,40 +63,10 @@ const Header: React.FC<HeaderProps> = ({
           
           {/* Health Status Indicator */}
           <div className="flex items-center space-x-4">
-            <div 
-              className="flex items-center space-x-2"
-              {...healthAria}
-            >
-              <div 
-                className={`
-                  w-3 h-3 rounded-full transition-colors duration-200
-                  ${healthLoading ? 'bg-gray-400 animate-pulse' :
-                    isHealthy ? 'bg-green-500' : 'bg-red-500'}
-                `}
-                aria-hidden="true"
-              />
-              <span className={`
-                text-sm font-medium
-                ${isMobile ? 'hidden sm:inline' : ''}
-                ${healthLoading ? 'text-gray-600' :
-                  isHealthy ? 'text-green-700' : 'text-red-700'}
-              `}>
-                {isMobile ? (
-                  <>
-                    <span className="sm:hidden">
-                      {healthLoading ? '...' : (isHealthy ? '✓' : '✗')}
-                    </span>
-                    <span className="hidden sm:inline">
-                      {healthLoading ? 'Checking...' : 
-                       isHealthy ? 'API Healthy' : 'API Unavailable'}
-                    </span>
-                  </>
-                ) : (
-                  healthLoading ? 'Checking...' : 
-                  isHealthy ? 'API Healthy' : 'API Unavailable'
-                )}
-              </span>
-            </div>
+            <HealthIndicator 
+              size={isMobile ? 'sm' : 'md'}
+              showDetails={!isMobile}
+            />
             
             {/* Future: User menu, notifications, etc. */}
             <div className="flex items-center space-x-2">

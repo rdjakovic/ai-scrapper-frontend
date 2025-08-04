@@ -1,5 +1,5 @@
 import React from 'react';
-import { JobForm } from '../components/forms';
+import { HealthAwareJobForm } from '../components';
 
 const CreateJob: React.FC = () => {
   return (
@@ -11,7 +11,7 @@ const CreateJob: React.FC = () => {
         </p>
       </div>
       
-      <JobForm />
+      <HealthAwareJobForm />
     </div>
   );
 };

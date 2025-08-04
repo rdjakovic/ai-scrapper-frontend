@@ -2,6 +2,12 @@ import { apiClient } from './api';
 import { HealthStatus } from '../types';
 import { isNetworkError, isServerError, withErrorHandling } from '../utils/errorHandling';
 import { transformHealthResponse } from '../utils/responseTransformers';
+import { 
+  withRetry, 
+  analyzeConnectionError, 
+  isApiUnavailable,
+  DEFAULT_RETRY_CONFIG 
+} from '../utils/connectionErrorHandler';
 
 /**
  * Health check result with additional metadata
@@ -46,7 +52,10 @@ export class HealthService {
    * Check health with retry logic
    */
   async checkHealthWithRetry(maxAttempts: number = 3): Promise<HealthStatus> {
-    return apiClient.requestWithRetry<HealthStatus>('get', '/health', undefined, undefined, maxAttempts);
+    return withRetry(
+      () => this.checkHealth(),
+      { ...DEFAULT_RETRY_CONFIG, maxAttempts }
+    );
   }
 
   /**
@@ -156,7 +165,22 @@ export class HealthService {
       await this.checkHealth();
       return true;
     } catch (error) {
+      // Log connection error details for debugging
+      const errorDetails = analyzeConnectionError(error);
+      console.warn('API connectivity test failed:', errorDetails);
       return false;
+    }
+  }
+
+  /**
+   * Check if the API is completely unavailable
+   */
+  async isApiUnavailable(): Promise<boolean> {
+    try {
+      await this.checkHealth();
+      return false;
+    } catch (error) {
+      return isApiUnavailable(error);
     }
   }
 

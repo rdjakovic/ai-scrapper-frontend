@@ -87,3 +87,6 @@ export * from './exportUtils';
 
 // Export accessibility utilities
 export * from './accessibility';
+
+// Export connection error handling utilities
+export * from './connectionErrorHandler';

@@ -6,6 +6,11 @@ export { default as JobCard } from './JobCard';
 export { default as JobList } from './JobList';
 export { JobActions } from './JobActions';
 
+// Health monitoring components
+export { default as HealthIndicator } from './HealthIndicator';
+export { default as HealthAwareJobForm } from './HealthAwareJobForm';
+export { default as HealthWarning } from './HealthWarning';
+
 // Error handling and feedback components
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as ErrorToast } from './ErrorToast';

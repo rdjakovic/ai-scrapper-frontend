@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHealthStatus, useJobDashboard } from '../hooks';
-import { LoadingSpinner } from '../components';
+import { LoadingSpinner, HealthWarning } from '../components';
 import { Link } from 'react-router-dom';
 import { PlusIcon, EyeIcon, ChartBarIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
@@ -58,6 +58,9 @@ const Dashboard: React.FC = () => {
           Overview of your web scraping operations and system status.
         </p>
       </div>
+
+      {/* Health Warning */}
+      <HealthWarning />
 
       {/* Job Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
