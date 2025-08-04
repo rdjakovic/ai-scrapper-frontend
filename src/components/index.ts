@@ -11,3 +11,7 @@ export { AppLayout, Header, Sidebar } from './layout';
 
 // Form components
 export { JobForm, UrlInput, SelectorBuilder, AdvancedOptions } from './forms';
+
+// Results components
+export { ResultsViewer, DataTable, JsonViewer, ScreenshotViewer, ExportButton } from './results';
+export type { ViewMode } from './results';
