@@ -6,6 +6,9 @@ export * from './useHealth';
 export * from './useJobManagement';
 export * from './useQueryUtils';
 
+// Export error handling hooks
+export * from './useErrorHandler';
+
 // Re-export React Query utilities that might be useful
 export { useQueryClient, useIsFetching, useIsMutating } from '@tanstack/react-query';
 

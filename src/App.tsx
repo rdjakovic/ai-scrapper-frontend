@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppLayout } from './components';
 import { Dashboard, CreateJob, Jobs, JobDetail, Results, Health } from './pages';
+import ErrorHandlingDemo from './demo/ErrorHandlingDemo';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/results" element={<Results />} />
           <Route path="/results/:jobId" element={<Results />} />
           <Route path="/health" element={<Health />} />
+          <Route path="/demo/error-handling" element={<ErrorHandlingDemo />} />
         </Routes>
       </AppLayout>
     </Router>

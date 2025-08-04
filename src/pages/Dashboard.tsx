@@ -171,7 +171,7 @@ const Dashboard: React.FC = () => {
             
             <div className="space-y-3">
               <Link
-                to="/create-job"
+                to="/create"
                 className={`w-full flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors ${
                   !canCreateJobs ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
