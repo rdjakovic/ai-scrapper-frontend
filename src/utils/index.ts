@@ -84,3 +84,6 @@ export * from './validation';
 
 // Export data export utilities
 export * from './exportUtils';
+
+// Export accessibility utilities
+export * from './accessibility';

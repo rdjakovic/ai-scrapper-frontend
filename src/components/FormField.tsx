@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { generateId, createFieldAria } from '../utils/accessibility';
 
 interface FormFieldProps {
   label?: string;
@@ -19,7 +20,19 @@ const FormField: React.FC<FormFieldProps> = ({
   helpText,
   id,
 }) => {
-  const fieldId = id || `field-${Math.random().toString(36).substr(2, 9)}`;
+  const fieldId = id || generateId('field');
+  const errorId = `${fieldId}-error`;
+  const helpId = `${fieldId}-help`;
+  
+  const describedBy = [];
+  if (error) describedBy.push(errorId);
+  if (helpText && !error) describedBy.push(helpId);
+
+  const fieldAria = createFieldAria({
+    required,
+    invalid: !!error,
+    describedBy: describedBy.length > 0 ? describedBy : undefined,
+  });
 
   return (
     <div className={`space-y-1 ${className}`}>
@@ -29,27 +42,33 @@ const FormField: React.FC<FormFieldProps> = ({
           className="block text-sm font-medium text-gray-700"
         >
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && (
+            <>
+              <span className="text-red-500 ml-1" aria-hidden="true">*</span>
+              <span className="sr-only">required</span>
+            </>
+          )}
         </label>
       )}
       
       <div className="relative">
         {React.cloneElement(children as React.ReactElement, {
           id: fieldId,
-          'aria-invalid': error ? 'true' : 'false',
-          'aria-describedby': error ? `${fieldId}-error` : helpText ? `${fieldId}-help` : undefined,
+          ...fieldAria,
           className: `${(children as React.ReactElement).props.className || ''} ${
             error ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''
           }`,
         })}
         
         {error && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+          <div 
+            className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+            aria-hidden="true"
+          >
             <svg
               className="h-5 w-5 text-red-500"
               fill="currentColor"
               viewBox="0 0 20 20"
-              aria-hidden="true"
             >
               <path
                 fillRule="evenodd"
@@ -63,14 +82,16 @@ const FormField: React.FC<FormFieldProps> = ({
       
       {error && (
         <p
-          id={`${fieldId}-error`}
+          id={errorId}
           className="text-sm text-red-600 flex items-center"
           role="alert"
+          aria-live="polite"
         >
           <svg
             className="h-4 w-4 mr-1 flex-shrink-0"
             fill="currentColor"
             viewBox="0 0 20 20"
+            aria-hidden="true"
           >
             <path
               fillRule="evenodd"
@@ -84,7 +105,7 @@ const FormField: React.FC<FormFieldProps> = ({
       
       {helpText && !error && (
         <p
-          id={`${fieldId}-help`}
+          id={helpId}
           className="text-sm text-gray-500"
         >
           {helpText}
