@@ -4,6 +4,8 @@ import { AppLayout, LoadingSpinner } from './components';
 import { Dashboard, CreateJob, Jobs, JobDetail, Results, Health, NotFound } from './pages';
 import { ProtectedRoute } from './components/routing';
 import { performanceMonitor, measurePageLoad } from './utils/performance';
+import { config } from './config/environment';
+import { registerServiceWorker, optimizeFontLoading } from './utils/cdn';
 import PerformanceDashboard from './components/PerformanceDashboard';
 
 // Lazy load demo components
@@ -13,6 +15,19 @@ function App() {
   useEffect(() => {
     // Initialize performance monitoring
     measurePageLoad();
+
+    // Initialize CDN and optimization features
+    optimizeFontLoading();
+    registerServiceWorker();
+
+    // Set document title from config
+    document.title = config.appTitle;
+    
+    // Set meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', config.appDescription);
+    }
 
     // Cleanup on unmount
     return () => {
@@ -80,8 +95,8 @@ function App() {
         </Suspense>
       </AppLayout>
       
-      {/* Performance Dashboard - only show in development */}
-      {import.meta.env.DEV && <PerformanceDashboard />}
+      {/* Performance Dashboard - only show when devtools enabled */}
+      {config.enableDevtools && <PerformanceDashboard />}
     </Router>
   );
 }
