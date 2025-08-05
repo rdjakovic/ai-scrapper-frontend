@@ -39,7 +39,7 @@ export { customRender as render }
 
 // Mock data factories
 export const createMockJob = (overrides = {}) => ({
-  id: '1',
+  job_id: '1',
   url: 'https://example.com',
   status: 'completed' as const,
   created_at: '2024-01-01T00:00:00Z',
@@ -52,7 +52,7 @@ export const createMockJob = (overrides = {}) => ({
 })
 
 export const createMockPendingJob = (overrides = {}) => ({
-  id: '2',
+  job_id: '2',
   url: 'https://test.com',
   status: 'pending' as const,
   created_at: '2024-01-01T00:10:00Z',
@@ -62,12 +62,12 @@ export const createMockPendingJob = (overrides = {}) => ({
 })
 
 export const createMockFailedJob = (overrides = {}) => ({
-  id: '3',
+  job_id: '3',
   url: 'https://failed.com',
   status: 'failed' as const,
   created_at: '2024-01-01T00:15:00Z',
   updated_at: '2024-01-01T00:20:00Z',
   result: null,
-  error: 'Failed to scrape URL',
+  error_message: 'Failed to scrape URL',
   ...overrides,
 })

@@ -1,139 +1,159 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '../../test/utils'
 import { JobActions } from '../JobActions'
 import { createMockJob, createMockPendingJob, createMockFailedJob } from '../../test/utils'
+import { JobStatus } from '../../types'
 
 describe('JobActions', () => {
-  const mockOnView = vi.fn()
+  const mockOnViewResults = vi.fn()
   const mockOnCancel = vi.fn()
   const mockOnRetry = vi.fn()
-  const mockOnDelete = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('shows view results button for completed jobs', () => {
-    const job = createMockJob()
+  it('shows view results button for completed jobs with results', () => {
+    const job = createMockJob({ status: JobStatus.COMPLETED })
     render(
       <JobActions
         job={job}
-        onView={mockOnView}
+        onViewResults={mockOnViewResults}
         onCancel={mockOnCancel}
         onRetry={mockOnRetry}
-        onDelete={mockOnDelete}
+        isCancelling={false}
+        isRetrying={false}
+        hasResults={true}
+        isLoadingResults={false}
       />
     )
 
     expect(screen.getByRole('button', { name: /view results/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument()
   })
 
   it('shows cancel button for pending jobs', () => {
-    const job = createMockPendingJob()
+    const job = createMockPendingJob({ status: JobStatus.PENDING })
     render(
       <JobActions
         job={job}
-        onView={mockOnView}
+        onViewResults={mockOnViewResults}
         onCancel={mockOnCancel}
         onRetry={mockOnRetry}
-        onDelete={mockOnDelete}
+        isCancelling={false}
+        isRetrying={false}
+        hasResults={false}
+        isLoadingResults={false}
       />
     )
 
-    expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /cancel job/i })).toBeInTheDocument()
   })
 
   it('shows retry button for failed jobs', () => {
-    const job = createMockFailedJob()
+    const job = createMockFailedJob({ status: JobStatus.FAILED })
     render(
       <JobActions
         job={job}
-        onView={mockOnView}
+        onViewResults={mockOnViewResults}
         onCancel={mockOnCancel}
         onRetry={mockOnRetry}
-        onDelete={mockOnDelete}
+        isCancelling={false}
+        isRetrying={false}
+        hasResults={false}
+        isLoadingResults={false}
       />
     )
 
-    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /retry job/i })).toBeInTheDocument()
   })
 
-  it('calls onView when view results button is clicked', () => {
-    const job = createMockJob()
+  it('calls onViewResults when view results button is clicked', () => {
+    const job = createMockJob({ status: JobStatus.COMPLETED })
     render(
       <JobActions
         job={job}
-        onView={mockOnView}
+        onViewResults={mockOnViewResults}
         onCancel={mockOnCancel}
         onRetry={mockOnRetry}
-        onDelete={mockOnDelete}
+        isCancelling={false}
+        isRetrying={false}
+        hasResults={true}
+        isLoadingResults={false}
       />
     )
 
     fireEvent.click(screen.getByRole('button', { name: /view results/i }))
-    expect(mockOnView).toHaveBeenCalledWith(job.id)
+    expect(mockOnViewResults).toHaveBeenCalled()
   })
 
   it('calls onCancel when cancel button is clicked', () => {
-    const job = createMockPendingJob()
+    const job = createMockPendingJob({ status: JobStatus.PENDING })
     render(
       <JobActions
         job={job}
-        onView={mockOnView}
+        onViewResults={mockOnViewResults}
         onCancel={mockOnCancel}
         onRetry={mockOnRetry}
-        onDelete={mockOnDelete}
+        isCancelling={false}
+        isRetrying={false}
+        hasResults={false}
+        isLoadingResults={false}
       />
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
-    expect(mockOnCancel).toHaveBeenCalledWith(job.id)
+    fireEvent.click(screen.getByRole('button', { name: /cancel job/i }))
+    expect(mockOnCancel).toHaveBeenCalled()
   })
 
   it('calls onRetry when retry button is clicked', () => {
-    const job = createMockFailedJob()
+    const job = createMockFailedJob({ status: JobStatus.FAILED })
     render(
       <JobActions
         job={job}
-        onView={mockOnView}
+        onViewResults={mockOnViewResults}
         onCancel={mockOnCancel}
         onRetry={mockOnRetry}
-        onDelete={mockOnDelete}
+        isCancelling={false}
+        isRetrying={false}
+        hasResults={false}
+        isLoadingResults={false}
       />
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /retry/i }))
-    expect(mockOnRetry).toHaveBeenCalledWith(job.id)
+    fireEvent.click(screen.getByRole('button', { name: /retry job/i }))
+    expect(mockOnRetry).toHaveBeenCalled()
   })
 
-  it('calls onDelete when delete button is clicked', () => {
-    const job = createMockJob()
+  it('shows no results available for completed jobs without results', () => {
+    const job = createMockJob({ status: JobStatus.COMPLETED })
     render(
       <JobActions
         job={job}
-        onView={mockOnView}
+        onViewResults={mockOnViewResults}
         onCancel={mockOnCancel}
         onRetry={mockOnRetry}
-        onDelete={mockOnDelete}
+        isCancelling={false}
+        isRetrying={false}
+        hasResults={false}
+        isLoadingResults={false}
       />
     )
 
-    fireEvent.click(screen.getByRole('button', { name: /delete/i }))
-    expect(mockOnDelete).toHaveBeenCalledWith(job.id)
+    expect(screen.getByRole('button', { name: /no results available/i })).toBeInTheDocument()
   })
 
   it('has proper accessibility attributes', () => {
-    const job = createMockJob()
+    const job = createMockJob({ status: JobStatus.COMPLETED })
     render(
       <JobActions
         job={job}
-        onView={mockOnView}
+        onViewResults={mockOnViewResults}
         onCancel={mockOnCancel}
         onRetry={mockOnRetry}
-        onDelete={mockOnDelete}
+        isCancelling={false}
+        isRetrying={false}
+        hasResults={true}
+        isLoadingResults={false}
       />
     )
 

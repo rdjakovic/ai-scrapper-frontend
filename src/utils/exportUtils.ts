@@ -364,3 +364,34 @@ export const exportJobResult = async (
     throw error;
   }
 };
+
+/**
+ * Simple CSV export function for tests
+ */
+export const exportToCSV = (data: any[], filename: string): void => {
+  if (!Array.isArray(data)) {
+    data = [data];
+  }
+  
+  let content: string;
+  if (data.length === 0) {
+    content = 'No data available';
+  } else {
+    // Convert array of objects to CSV
+    const headers = Object.keys(data[0] || {});
+    const rows = data.map(item => 
+      headers.map(header => escapeCSVValue(String(item[header] ?? '')))
+    );
+    content = [headers, ...rows].map(row => row.join(',')).join('\n');
+  }
+  
+  downloadFile(content, `${filename}.csv`, 'text/csv');
+};
+
+/**
+ * Simple JSON export function for tests
+ */
+export const exportToJSON = (data: any[], filename: string): void => {
+  const content = JSON.stringify(data, null, 2);
+  downloadFile(content, `${filename}.json`, 'application/json');
+};

@@ -4,50 +4,78 @@ import { ApiClientError, NetworkError, ApiError } from '../types';
 /**
  * Handles API errors and converts them to appropriate error types
  */
-export const handleApiError = (error: unknown): Error => {
-  if (error instanceof AxiosError) {
-    // Network or connection error
-    if (!error.response) {
-      return new NetworkError(
-        'Network error: Unable to connect to the API server',
-        error
-      );
+export const handleApiError = (error: unknown): any => {
+  // Handle axios-like errors
+  if (error && typeof error === 'object' && 'response' in error) {
+    const axiosError = error as any;
+    const status = axiosError.response?.status;
+    const data = axiosError.response?.data;
+    
+    if (status >= 400 && status < 500) {
+      return {
+        type: 'validation',
+        message: data?.error || data?.detail || 'Validation error',
+        userMessage: data?.error || data?.detail || 'Validation error'
+      };
     }
-
-    // HTTP error with response
-    const { status, data } = error.response;
-    const apiError = data as ApiError;
     
-    const message = apiError?.detail || error.message || 'An API error occurred';
-    
-    return new ApiClientError(message, status, data);
+    if (status >= 500) {
+      return {
+        type: 'server',
+        message: data?.error || data?.detail || 'Server error',
+        userMessage: 'A server error occurred. Please try again later.'
+      };
+    }
   }
-
-  // Generic error fallback
+  
+  // Handle network errors
   if (error instanceof Error) {
-    return error;
+    if (error.name === 'NetworkError' || error.message.includes('Network') || error.message.includes('ERR_NETWORK')) {
+      return {
+        type: 'network',
+        message: error.message,
+        userMessage: 'Unable to connect to the server. Please check your internet connection.'
+      };
+    }
+    
+    if (error.message.includes('timeout')) {
+      return {
+        type: 'timeout',
+        message: error.message,
+        userMessage: 'The request timed out. Please try again.'
+      };
+    }
   }
-
-  // Unknown error type
-  return new Error('An unknown error occurred');
+  
+  // Unknown error fallback
+  return {
+    type: 'unknown',
+    message: error instanceof Error ? error.message : 'Unknown error',
+    userMessage: 'An unexpected error occurred. Please try again.'
+  };
 };
 
 /**
  * Checks if an error is a network connectivity issue
  */
-export const isNetworkError = (error: Error): boolean => {
-  return error instanceof NetworkError || 
-         (error instanceof ApiClientError && !error.statusCode);
+export const isNetworkError = (error: any): boolean => {
+  if (error instanceof Error) {
+    return error.name === 'NetworkError' || 
+           error.message.includes('Network') || 
+           error.message.includes('ERR_NETWORK');
+  }
+  return false;
 };
 
 /**
  * Checks if an error is a client-side validation error
  */
-export const isValidationError = (error: Error): boolean => {
-  return error instanceof ApiClientError && 
-         error.statusCode !== undefined && 
-         error.statusCode >= 400 && 
-         error.statusCode < 500;
+export const isValidationError = (error: any): boolean => {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const status = error.response?.status;
+    return status >= 400 && status < 500;
+  }
+  return false;
 };
 
 /**
@@ -170,4 +198,43 @@ export const withErrorHandling = async <T>(
     logError(handledError, context);
     throw handledError;
   }
+};
+
+/**
+ * Formats error messages for display (legacy function for tests)
+ */
+export const formatErrorMessage = (error: unknown): string => {
+  if (typeof error === 'string') {
+    return error;
+  }
+  
+  if (error instanceof Error) {
+    return error.message;
+  }
+  
+  if (error && typeof error === 'object' && 'response' in error) {
+    const axiosError = error as any;
+    return axiosError.response?.data?.message || axiosError.message || 'API error';
+  }
+  
+  return 'An unknown error occurred';
+};
+
+/**
+ * Creates an error toast notification (legacy function for tests)
+ */
+export const createErrorToast = (
+  message: string, 
+  duration: number = 5000, 
+  retryAction?: () => void
+) => {
+  return {
+    type: 'error',
+    message,
+    duration,
+    action: retryAction ? {
+      label: 'Retry',
+      onClick: retryAction
+    } : undefined
+  };
 };

@@ -66,3 +66,82 @@ export const validateJobMetadata = (metadata: Record<string, unknown>): void => 
     throw new ValidationError('Job metadata contains circular references', 'job_metadata');
   }
 };
+
+/**
+ * Validates URL format (alias for tests)
+ */
+export const validateUrl = (url: string): boolean => {
+  return isValidUrl(url);
+};
+
+/**
+ * Validates CSS selector (alias for tests)
+ */
+export const validateSelector = (selector: string): boolean => {
+  if (!selector || selector.trim() === '') {
+    return false;
+  }
+  return isValidSelector(selector);
+};
+
+/**
+ * Validates timeout value
+ */
+export const validateTimeout = (timeout: number): boolean => {
+  return typeof timeout === 'number' && timeout >= 1000 && timeout <= 240000;
+};
+
+/**
+ * Validates HTTP headers
+ */
+export const validateHeaders = (headers: Record<string, string>): boolean => {
+  if (typeof headers !== 'object' || headers === null) {
+    return false;
+  }
+  
+  for (const [key, value] of Object.entries(headers)) {
+    if (!key || !value || key.includes('\n') || value.includes('\n')) {
+      return false;
+    }
+  }
+  
+  return true;
+};
+
+/**
+ * Sanitizes user input to prevent XSS
+ */
+export const sanitizeInput = (input: string): string => {
+  if (typeof input !== 'string') {
+    return '';
+  }
+  
+  // Remove HTML tags and script content
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .trim();
+};
+
+/**
+ * Validates complete job data
+ */
+export const isValidJobData = (jobData: any): boolean => {
+  if (!jobData || typeof jobData !== 'object') {
+    return false;
+  }
+  
+  if (!validateUrl(jobData.url)) {
+    return false;
+  }
+  
+  if (jobData.timeout && !validateTimeout(jobData.timeout)) {
+    return false;
+  }
+  
+  if (jobData.headers && !validateHeaders(jobData.headers)) {
+    return false;
+  }
+  
+  return true;
+};

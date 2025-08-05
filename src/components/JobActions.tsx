@@ -26,8 +26,9 @@ export function JobActions({
   const canCancel = job.status === JobStatus.PENDING || job.status === JobStatus.IN_PROGRESS;
   const canRetry = job.status === JobStatus.FAILED || job.status === JobStatus.CANCELLED;
   const canViewResults = job.status === JobStatus.COMPLETED && hasResults;
+  const showNoResults = job.status === JobStatus.COMPLETED && !hasResults;
 
-  if (!canCancel && !canRetry && !canViewResults) {
+  if (!canCancel && !canRetry && !canViewResults && !showNoResults) {
     return null;
   }
 
@@ -38,6 +39,7 @@ export function JobActions({
         {/* Cancel Button */}
         {canCancel && (
           <button
+            type="button"
             onClick={onCancel}
             disabled={isCancelling}
             className="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -61,6 +63,7 @@ export function JobActions({
         {/* Retry Button */}
         {canRetry && (
           <button
+            type="button"
             onClick={onRetry}
             disabled={isRetrying}
             className="inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -82,10 +85,11 @@ export function JobActions({
         )}
 
         {/* View Results Button */}
-        {job.status === JobStatus.COMPLETED && (
+        {canViewResults && (
           <button
+            type="button"
             onClick={onViewResults}
-            disabled={isLoadingResults || !hasResults}
+            disabled={isLoadingResults}
             className="inline-flex items-center px-4 py-2 border border-green-300 text-sm font-medium rounded-md text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoadingResults ? (
@@ -93,7 +97,7 @@ export function JobActions({
                 <LoadingSpinner size="sm" className="mr-2" />
                 Loading Results...
               </>
-            ) : hasResults ? (
+            ) : (
               <>
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -101,14 +105,21 @@ export function JobActions({
                 </svg>
                 View Results
               </>
-            ) : (
-              <>
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                No Results Available
-              </>
             )}
+          </button>
+        )}
+
+        {/* No Results Available Button */}
+        {showNoResults && (
+          <button
+            type="button"
+            disabled={true}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-500 bg-gray-50 cursor-not-allowed"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            No Results Available
           </button>
         )}
       </div>
