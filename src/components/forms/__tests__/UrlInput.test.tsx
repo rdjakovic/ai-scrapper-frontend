@@ -1,81 +1,73 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '../../../test/utils'
+import { render, screen, fireEvent } from '../../../test/utils'
 import userEvent from '@testing-library/user-event'
 import { UrlInput } from '../UrlInput'
 
-const mockOnSubmit = vi.fn()
-
 describe('UrlInput', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+  it('renders input field correctly', () => {
+    render(<UrlInput value="" onChange={vi.fn()} />)
+
+    const input = screen.getByRole('textbox')
+    expect(input).toBeInTheDocument()
+    expect(input).toHaveAttribute('type', 'url')
+    expect(input).toHaveAttribute('placeholder', 'https://example.com')
   })
 
-  it('renders input field and submit button', () => {
-    render(<UrlInput onSubmit={mockOnSubmit} isLoading={false} />)
-
-    expect(screen.getByPlaceholderText('Enter URL to scrape...')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /scrape/i })).toBeInTheDocument()
-  })
-
-  it('validates URL format', async () => {
+  it('calls onChange when value changes', async () => {
     const user = userEvent.setup()
-    render(<UrlInput onSubmit={mockOnSubmit} isLoading={false} />)
+    const mockOnChange = vi.fn()
+    render(<UrlInput value="" onChange={mockOnChange} />)
 
-    const input = screen.getByPlaceholderText('Enter URL to scrape...')
-    const submitButton = screen.getByRole('button', { name: /scrape/i })
+    const input = screen.getByRole('textbox')
+    await user.type(input, 'https://test.com')
 
-    await user.type(input, 'invalid-url')
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(screen.getByText(/please enter a valid url/i)).toBeInTheDocument()
-    })
-
-    expect(mockOnSubmit).not.toHaveBeenCalled()
+    expect(mockOnChange).toHaveBeenCalledWith('https://test.com')
   })
 
-  it('submits valid URL', async () => {
-    const user = userEvent.setup()
-    render(<UrlInput onSubmit={mockOnSubmit} isLoading={false} />)
+  it('shows validation error for invalid URL', () => {
+    render(<UrlInput value="invalid-url" onChange={vi.fn()} error="Invalid URL format" />)
 
-    const input = screen.getByPlaceholderText('Enter URL to scrape...')
-    const submitButton = screen.getByRole('button', { name: /scrape/i })
-
-    await user.type(input, 'https://example.com')
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith('https://example.com')
-    })
+    expect(screen.getByText('Invalid URL format')).toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toHaveClass('border-red-300')
   })
 
-  it('shows loading state', () => {
-    render(<UrlInput onSubmit={mockOnSubmit} isLoading={true} />)
+  it('shows valid state for valid URL', () => {
+    render(<UrlInput value="https://example.com" onChange={vi.fn()} />)
 
-    const submitButton = screen.getByRole('button', { name: /scraping/i })
-    expect(submitButton).toBeDisabled()
+    const input = screen.getByRole('textbox')
+    expect(input).toHaveClass('border-green-300')
   })
 
-  it('clears input after successful submission', async () => {
-    const user = userEvent.setup()
-    render(<UrlInput onSubmit={mockOnSubmit} isLoading={false} />)
+  it('shows URL preview when enabled', () => {
+    render(<UrlInput value="https://example.com" onChange={vi.fn()} showPreview />)
 
-    const input = screen.getByPlaceholderText('Enter URL to scrape...') as HTMLInputElement
-    const submitButton = screen.getByRole('button', { name: /scrape/i })
-
-    await user.type(input, 'https://example.com')
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(input.value).toBe('')
-    })
+    expect(screen.getByText('Preview: https://example.com')).toBeInTheDocument()
   })
 
   it('has proper accessibility attributes', () => {
-    render(<UrlInput onSubmit={mockOnSubmit} isLoading={false} />)
+    render(<UrlInput value="" onChange={vi.fn()} label="Website URL" />)
 
-    const input = screen.getByPlaceholderText('Enter URL to scrape...')
-    expect(input).toHaveAttribute('aria-label', 'URL to scrape')
-    expect(input).toHaveAttribute('type', 'url')
+    const input = screen.getByRole('textbox')
+    expect(input).toHaveAttribute('aria-label', 'Website URL')
+    expect(input).toHaveAttribute('aria-invalid', 'false')
+  })
+
+  it('shows aria-invalid when there is an error', () => {
+    render(<UrlInput value="invalid" onChange={vi.fn()} error="Invalid URL" />)
+
+    const input = screen.getByRole('textbox')
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('supports paste event handling', async () => {
+    const user = userEvent.setup()
+    const mockOnChange = vi.fn()
+    render(<UrlInput value="" onChange={mockOnChange} />)
+
+    const input = screen.getByRole('textbox')
+    await user.click(input)
+    await user.paste('https://pasted-url.com')
+
+    expect(mockOnChange).toHaveBeenCalledWith('https://pasted-url.com')
   })
 })
