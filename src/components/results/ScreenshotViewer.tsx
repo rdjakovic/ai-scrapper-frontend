@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LazyImage from '../LazyImage';
 
 interface ScreenshotViewerProps {
   screenshot: string;
@@ -179,7 +180,7 @@ export const ScreenshotViewer: React.FC<ScreenshotViewerProps> = ({
 
             <div className="overflow-auto max-h-[70vh] p-4">
               <div className="flex justify-center">
-                <img
+                <LazyImage
                   src={`data:image/png;base64,${screenshot}`}
                   alt="Screenshot"
                   onLoad={handleImageLoad}
@@ -190,6 +191,14 @@ export const ScreenshotViewer: React.FC<ScreenshotViewerProps> = ({
                     transition: 'transform 0.2s ease-in-out',
                   }}
                   className="max-w-none shadow-lg rounded border"
+                  placeholder={
+                    <div className="flex items-center justify-center bg-gray-100 min-h-[400px]">
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                        <span className="text-gray-600">Loading screenshot...</span>
+                      </div>
+                    </div>
+                  }
                 />
               </div>
             </div>

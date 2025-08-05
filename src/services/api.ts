@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { config } from '../config/environment';
 import { handleApiError, shouldRetry } from '../utils/errorHandling';
+import { performanceMonitor } from '../utils/performance';
 
 /**
  * Base API client class with Axios for HTTP communication
@@ -57,10 +58,28 @@ export class ApiClient {
    * Generic GET request
    */
   async get<T>(endpoint: string, config?: AxiosRequestConfig): Promise<T> {
+    const startTime = performance.now();
     try {
       const response: AxiosResponse<T> = await this.axiosInstance.get(endpoint, config);
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      performanceMonitor.trackCustomMetric(
+        `api_get_${endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        duration,
+        duration < 1000 ? 'good' : duration < 3000 ? 'needs-improvement' : 'poor'
+      );
+      
       return response.data;
     } catch (error) {
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      performanceMonitor.trackCustomMetric(
+        `api_get_error_${endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        duration
+      );
+      
       throw handleApiError(error);
     }
   }
@@ -69,10 +88,28 @@ export class ApiClient {
    * Generic POST request
    */
   async post<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+    const startTime = performance.now();
     try {
       const response: AxiosResponse<T> = await this.axiosInstance.post(endpoint, data, config);
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      performanceMonitor.trackCustomMetric(
+        `api_post_${endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        duration,
+        duration < 2000 ? 'good' : duration < 5000 ? 'needs-improvement' : 'poor'
+      );
+      
       return response.data;
     } catch (error) {
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      performanceMonitor.trackCustomMetric(
+        `api_post_error_${endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        duration
+      );
+      
       throw handleApiError(error);
     }
   }

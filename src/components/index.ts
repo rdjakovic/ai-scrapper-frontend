@@ -29,3 +29,8 @@ export { JobForm, UrlInput, SelectorBuilder, AdvancedOptions } from './forms';
 // Results components
 export { ResultsViewer, DataTable, JsonViewer, ScreenshotViewer, ExportButton } from './results';
 export type { ViewMode } from './results';
+
+// Performance and optimization components
+export { default as LazyImage } from './LazyImage';
+export { default as VirtualizedJobList } from './VirtualizedJobList';
+export { default as PerformanceDashboard } from './PerformanceDashboard';

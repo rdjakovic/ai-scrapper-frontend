@@ -1,15 +1,30 @@
-import React from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AppLayout } from './components';
+import { AppLayout, LoadingSpinner } from './components';
 import { Dashboard, CreateJob, Jobs, JobDetail, Results, Health, NotFound } from './pages';
 import { ProtectedRoute } from './components/routing';
-import ErrorHandlingDemo from './demo/ErrorHandlingDemo';
+import { performanceMonitor, measurePageLoad } from './utils/performance';
+import PerformanceDashboard from './components/PerformanceDashboard';
+
+// Lazy load demo components
+const ErrorHandlingDemo = lazy(() => import('./demo/ErrorHandlingDemo'));
 
 function App() {
+  useEffect(() => {
+    // Initialize performance monitoring
+    measurePageLoad();
+
+    // Cleanup on unmount
+    return () => {
+      performanceMonitor.disconnect();
+    };
+  }, []);
+
   return (
     <Router>
       <AppLayout>
-        <Routes>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
           {/* Public routes */}
           <Route path="/" element={<Dashboard />} />
           <Route path="/health" element={<Health />} />
@@ -62,7 +77,11 @@ function App() {
           {/* 404 catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </AppLayout>
+      
+      {/* Performance Dashboard - only show in development */}
+      {import.meta.env.DEV && <PerformanceDashboard />}
     </Router>
   );
 }
