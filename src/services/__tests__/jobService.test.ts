@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { server } from '../../test/mocks/server'
 import { http, HttpResponse } from 'msw'
-import * as jobService from '../jobService'
+import { jobService } from '../jobService'
 
 const API_BASE_URL = 'http://localhost:8000'
 

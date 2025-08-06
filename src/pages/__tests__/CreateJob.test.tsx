@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '../../test/utils'
 import userEvent from '@testing-library/user-event'
-import { CreateJob } from '../CreateJob'
+import CreateJob from '../CreateJob'
 import * as hooks from '../../hooks'
 
 // Mock react-router-dom
@@ -17,7 +17,7 @@ vi.mock('react-router-dom', async () => {
 // Mock the hooks
 vi.mock('../../hooks', () => ({
   useJobManagement: vi.fn(),
-  useHealth: vi.fn(),
+  useHealthStatus: vi.fn(),
 }))
 
 describe('CreateJob', () => {
@@ -32,7 +32,7 @@ describe('CreateJob', () => {
       createError: null
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
+    ;(hooks.useHealthStatus as any).mockReturnValue({
       canCreateJobs: true,
       isHealthy: true
     })
@@ -54,7 +54,7 @@ describe('CreateJob', () => {
       createError: null
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
+    ;(hooks.useHealthStatus as any).mockReturnValue({
       canCreateJobs: true,
       isHealthy: true
     })
@@ -89,7 +89,7 @@ describe('CreateJob', () => {
       createError: null
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
+    ;(hooks.useHealthStatus as any).mockReturnValue({
       canCreateJobs: true,
       isHealthy: true
     })
@@ -114,7 +114,7 @@ describe('CreateJob', () => {
       createError: null
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
+    ;(hooks.useHealthStatus as any).mockReturnValue({
       canCreateJobs: true,
       isHealthy: true
     })
@@ -131,7 +131,7 @@ describe('CreateJob', () => {
       createError: 'Failed to create job'
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
+    ;(hooks.useHealthStatus as any).mockReturnValue({
       canCreateJobs: true,
       isHealthy: true
     })
@@ -149,7 +149,7 @@ describe('CreateJob', () => {
       createError: null
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
+    ;(hooks.useHealthStatus as any).mockReturnValue({
       canCreateJobs: false,
       isHealthy: false
     })
@@ -170,7 +170,7 @@ describe('CreateJob', () => {
       createError: null
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
+    ;(hooks.useHealthStatus as any).mockReturnValue({
       canCreateJobs: true,
       isHealthy: true
     })
@@ -194,7 +194,7 @@ describe('CreateJob', () => {
       createError: null
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
+    ;(hooks.useHealthStatus as any).mockReturnValue({
       canCreateJobs: true,
       isHealthy: true
     })

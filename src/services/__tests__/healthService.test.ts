@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { server } from '../../test/mocks/server'
 import { http, HttpResponse } from 'msw'
-import * as healthService from '../healthService'
+import { healthService } from '../healthService'
 
 const API_BASE_URL = 'http://localhost:8000'
 
@@ -10,7 +10,7 @@ describe('healthService', () => {
     server.resetHandlers()
   })
 
-  describe('getHealth', () => {
+  describe('checkHealth', () => {
     it('fetches health status successfully', async () => {
       const mockHealth = {
         status: 'healthy',
@@ -27,7 +27,7 @@ describe('healthService', () => {
         })
       )
 
-      const result = await healthService.getHealth()
+      const result = await healthService.checkHealth()
 
       expect(result).toEqual(mockHealth)
     })
@@ -48,7 +48,7 @@ describe('healthService', () => {
         })
       )
 
-      const result = await healthService.getHealth()
+      const result = await healthService.checkHealth()
 
       expect(result.status).toBe('unhealthy')
       expect(result.database).toBe('disconnected')
@@ -61,7 +61,7 @@ describe('healthService', () => {
         })
       )
 
-      await expect(healthService.getHealth()).rejects.toThrow()
+      await expect(healthService.checkHealth()).rejects.toThrow()
     })
 
     it('handles timeout errors', async () => {
@@ -72,7 +72,7 @@ describe('healthService', () => {
       )
 
       // This would need to be tested with actual timeout configuration
-      expect(healthService.getHealth).toBeDefined()
+      expect(healthService.checkHealth).toBeDefined()
     })
   })
 
@@ -102,16 +102,15 @@ describe('healthService', () => {
     })
   })
 
-  describe('getHealthMetrics', () => {
-    it('extracts metrics from health response', async () => {
+  describe('getDetailedHealth', () => {
+    it('extracts detailed metrics from health response', async () => {
       const mockHealth = {
         status: 'healthy',
         timestamp: '2024-01-01T00:00:00Z',
         database: 'connected',
         redis: 'connected',
         version: '1.0.0',
-        uptime: 7200,
-        response_time: 150
+        uptime: 7200
       }
 
       server.use(
@@ -120,11 +119,13 @@ describe('healthService', () => {
         })
       )
 
-      const result = await healthService.getHealthMetrics()
+      const result = await healthService.getDetailedHealth()
 
-      expect(result.uptime).toBe(7200)
-      expect(result.version).toBe('1.0.0')
-      expect(result.responseTime).toBe(150)
+      expect(result.overall).toBe(true)
+      expect(result.components.database).toBe(true)
+      expect(result.components.redis).toBe(true)
+      expect(result.metadata.uptime).toBe(7200)
+      expect(result.metadata.version).toBe('1.0.0')
     })
 
     it('handles missing metrics gracefully', async () => {
@@ -139,45 +140,49 @@ describe('healthService', () => {
         })
       )
 
-      const result = await healthService.getHealthMetrics()
+      const result = await healthService.getDetailedHealth()
 
-      expect(result.uptime).toBe(0)
-      expect(result.version).toBe('unknown')
-      expect(result.responseTime).toBe(0)
+      expect(result.overall).toBe(true)
+      expect(result.metadata.uptime).toBe(0)
+      expect(result.metadata.version).toBe(undefined)
     })
   })
 
-  describe('isHealthy', () => {
-    it('returns true for healthy status', () => {
-      const healthData = { status: 'healthy' }
-      expect(healthService.isHealthy(healthData)).toBe(true)
+  describe('isReadyForJobs', () => {
+    it('returns true when ready for jobs', async () => {
+      const mockHealth = {
+        status: 'healthy',
+        database: 'connected',
+        redis: 'connected'
+      }
+
+      server.use(
+        http.get(`${API_BASE_URL}/health`, () => {
+          return HttpResponse.json(mockHealth)
+        })
+      )
+
+      const result = await healthService.isReadyForJobs()
+
+      expect(result).toBe(true)
     })
 
-    it('returns false for unhealthy status', () => {
-      const healthData = { status: 'unhealthy' }
-      expect(healthService.isHealthy(healthData)).toBe(false)
-    })
+    it('returns false when database is disconnected', async () => {
+      const mockHealth = {
+        status: 'healthy',
+        database: 'disconnected',
+        redis: 'connected'
+      }
 
-    it('returns false for degraded status', () => {
-      const healthData = { status: 'degraded' }
-      expect(healthService.isHealthy(healthData)).toBe(false)
-    })
-  })
+      server.use(
+        http.get(`${API_BASE_URL}/health`, () => {
+          return HttpResponse.json(mockHealth)
+        })
+      )
 
-  describe('canCreateJobs', () => {
-    it('returns true when healthy', () => {
-      const healthData = { status: 'healthy', database: 'connected' }
-      expect(healthService.canCreateJobs(healthData)).toBe(true)
-    })
+      const result = await healthService.isReadyForJobs()
 
-    it('returns false when unhealthy', () => {
-      const healthData = { status: 'unhealthy', database: 'disconnected' }
-      expect(healthService.canCreateJobs(healthData)).toBe(false)
-    })
-
-    it('returns false when database is disconnected', () => {
-      const healthData = { status: 'healthy', database: 'disconnected' }
-      expect(healthService.canCreateJobs(healthData)).toBe(false)
+      expect(result).toBe(false)
     })
   })
 })

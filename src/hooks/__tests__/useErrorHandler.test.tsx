@@ -1,13 +1,16 @@
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useErrorHandler } from '../useErrorHandler'
+import { ToastProvider } from '../../providers/ToastProvider'
 
 // Mock console.error to avoid noise in tests
 vi.spyOn(console, 'error').mockImplementation(() => {})
 
 describe('useErrorHandler', () => {
   it('handles errors and provides error state', () => {
-    const { result } = renderHook(() => useErrorHandler())
+    const { result } = renderHook(() => useErrorHandler(), {
+      wrapper: ToastProvider
+    })
 
     expect(result.current.error).toBeNull()
     expect(result.current.hasError).toBe(false)
@@ -21,7 +24,9 @@ describe('useErrorHandler', () => {
   })
 
   it('clears error state', () => {
-    const { result } = renderHook(() => useErrorHandler())
+    const { result } = renderHook(() => useErrorHandler(), {
+      wrapper: ToastProvider
+    })
 
     act(() => {
       result.current.handleError(new Error('Test error'))
@@ -38,7 +43,9 @@ describe('useErrorHandler', () => {
   })
 
   it('handles string errors', () => {
-    const { result } = renderHook(() => useErrorHandler())
+    const { result } = renderHook(() => useErrorHandler(), {
+      wrapper: ToastProvider
+    })
 
     act(() => {
       result.current.handleError('String error')
@@ -49,7 +56,9 @@ describe('useErrorHandler', () => {
   })
 
   it('handles axios errors with response', () => {
-    const { result } = renderHook(() => useErrorHandler())
+    const { result } = renderHook(() => useErrorHandler(), {
+      wrapper: ToastProvider
+    })
 
     const axiosError = {
       isAxiosError: true,
@@ -67,7 +76,9 @@ describe('useErrorHandler', () => {
   })
 
   it('handles axios errors without response', () => {
-    const { result } = renderHook(() => useErrorHandler())
+    const { result } = renderHook(() => useErrorHandler(), {
+      wrapper: ToastProvider
+    })
 
     const axiosError = {
       isAxiosError: true,

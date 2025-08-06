@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '../../test/utils'
-import { StatusBadge } from '../StatusBadge'
+import StatusBadge from '../StatusBadge'
 
 describe('StatusBadge', () => {
   it('renders pending status correctly', () => {

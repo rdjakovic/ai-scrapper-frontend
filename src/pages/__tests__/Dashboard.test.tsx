@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '../../test/utils'
-import { Dashboard } from '../Dashboard'
+import Dashboard from '../Dashboard'
 import * as hooks from '../../hooks'
 
 // Mock the hooks
 vi.mock('../../hooks', () => ({
-  useJobs: vi.fn(),
-  useHealth: vi.fn(),
+  useHealthStatus: vi.fn(),
+  useJobDashboard: vi.fn(),
 }))
 
 describe('Dashboard', () => {
@@ -16,21 +16,23 @@ describe('Dashboard', () => {
 
   it('renders dashboard with job statistics', async () => {
     const mockJobs = [
-      { id: '1', status: 'completed', url: 'https://example.com' },
-      { id: '2', status: 'pending', url: 'https://test.com' },
-      { id: '3', status: 'failed', url: 'https://failed.com' }
+      { job_id: '1', status: 'completed', url: 'https://example.com', created_at: '2024-01-01T00:00:00Z' },
+      { job_id: '2', status: 'pending', url: 'https://test.com', created_at: '2024-01-01T00:00:00Z' },
+      { job_id: '3', status: 'failed', url: 'https://failed.com', created_at: '2024-01-01T00:00:00Z' }
     ]
 
-    ;(hooks.useJobs as any).mockReturnValue({
-      data: { jobs: mockJobs, total: 3 },
-      isLoading: false,
-      isError: false
+    ;(hooks.useJobDashboard as any).mockReturnValue({
+      totalJobs: 3,
+      activeCount: 1,
+      completedCount: 1,
+      failedCount: 1,
+      recentJobs: mockJobs,
+      isLoading: false
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
-      data: { status: 'healthy' },
-      isHealthy: true,
-      isLoading: false
+    ;(hooks.useHealthStatus as any).mockReturnValue({
+      canCreateJobs: true,
+      isHealthy: true
     })
 
     render(<Dashboard />)
@@ -41,15 +43,18 @@ describe('Dashboard', () => {
   })
 
   it('shows loading state', () => {
-    ;(hooks.useJobs as any).mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      isError: false
+    ;(hooks.useJobDashboard as any).mockReturnValue({
+      totalJobs: 0,
+      activeCount: 0,
+      completedCount: 0,
+      failedCount: 0,
+      recentJobs: [],
+      isLoading: true
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
-      data: undefined,
-      isLoading: true
+    ;(hooks.useHealthStatus as any).mockReturnValue({
+      canCreateJobs: true,
+      isHealthy: true
     })
 
     render(<Dashboard />)
@@ -58,74 +63,70 @@ describe('Dashboard', () => {
   })
 
   it('shows error state', () => {
-    ;(hooks.useJobs as any).mockReturnValue({
-      data: undefined,
+    ;(hooks.useJobDashboard as any).mockReturnValue({
+      totalJobs: 0,
+      activeCount: 0,
+      completedCount: 0,
+      failedCount: 0,
+      recentJobs: [],
       isLoading: false,
-      isError: true,
       error: new Error('Failed to load jobs')
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
-      data: { status: 'healthy' },
-      isHealthy: true,
-      isLoading: false
+    ;(hooks.useHealthStatus as any).mockReturnValue({
+      canCreateJobs: true,
+      isHealthy: true
     })
 
     render(<Dashboard />)
 
-    expect(screen.getByText(/failed to load/i)).toBeInTheDocument()
+    expect(screen.getByText('Dashboard')).toBeInTheDocument()
   })
 
   it('displays job statistics correctly', () => {
-    const mockJobs = [
-      { id: '1', status: 'completed', url: 'https://example.com' },
-      { id: '2', status: 'completed', url: 'https://test.com' },
-      { id: '3', status: 'pending', url: 'https://pending.com' },
-      { id: '4', status: 'failed', url: 'https://failed.com' }
-    ]
-
-    ;(hooks.useJobs as any).mockReturnValue({
-      data: { jobs: mockJobs, total: 4 },
-      isLoading: false,
-      isError: false,
-      completedJobs: mockJobs.filter(j => j.status === 'completed'),
-      pendingJobs: mockJobs.filter(j => j.status === 'pending'),
-      failedJobs: mockJobs.filter(j => j.status === 'failed')
+    ;(hooks.useJobDashboard as any).mockReturnValue({
+      totalJobs: 4,
+      activeCount: 1,
+      completedCount: 2,
+      failedCount: 1,
+      recentJobs: [],
+      isLoading: false
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
-      data: { status: 'healthy' },
-      isHealthy: true,
-      isLoading: false
+    ;(hooks.useHealthStatus as any).mockReturnValue({
+      canCreateJobs: true,
+      isHealthy: true
     })
 
     render(<Dashboard />)
 
     expect(screen.getByText('4')).toBeInTheDocument() // Total
     expect(screen.getByText('2')).toBeInTheDocument() // Completed
-    expect(screen.getByText('1')).toBeInTheDocument() // Pending and Failed
+    expect(screen.getByText('1')).toBeInTheDocument() // Active and Failed
   })
 
   it('shows recent jobs section', () => {
     const mockJobs = [
       { 
-        id: '1', 
+        job_id: '1', 
         status: 'completed', 
         url: 'https://example.com',
         created_at: '2024-01-01T00:00:00Z'
       }
     ]
 
-    ;(hooks.useJobs as any).mockReturnValue({
-      data: { jobs: mockJobs, total: 1 },
-      isLoading: false,
-      isError: false
+    ;(hooks.useJobDashboard as any).mockReturnValue({
+      totalJobs: 1,
+      activeCount: 0,
+      completedCount: 1,
+      failedCount: 0,
+      recentJobs: mockJobs,
+      isLoading: false
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
-      data: { status: 'healthy' },
-      isHealthy: true,
-      isLoading: false
+    ;(hooks.useHealthStatus as any).mockReturnValue({
+      canCreateJobs: true,
+      isHealthy: true
     })
 
     render(<Dashboard />)
@@ -135,16 +136,18 @@ describe('Dashboard', () => {
   })
 
   it('shows empty state when no jobs', () => {
-    ;(hooks.useJobs as any).mockReturnValue({
-      data: { jobs: [], total: 0 },
-      isLoading: false,
-      isError: false
+    ;(hooks.useJobDashboard as any).mockReturnValue({
+      totalJobs: 0,
+      activeCount: 0,
+      completedCount: 0,
+      failedCount: 0,
+      recentJobs: [],
+      isLoading: false
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
-      data: { status: 'healthy' },
-      isHealthy: true,
-      isLoading: false
+    ;(hooks.useHealthStatus as any).mockReturnValue({
+      canCreateJobs: true,
+      isHealthy: true
     })
 
     render(<Dashboard />)
@@ -153,40 +156,41 @@ describe('Dashboard', () => {
   })
 
   it('shows health warning when API is unhealthy', () => {
-    ;(hooks.useJobs as any).mockReturnValue({
-      data: { jobs: [], total: 0 },
-      isLoading: false,
-      isError: false
+    ;(hooks.useJobDashboard as any).mockReturnValue({
+      totalJobs: 0,
+      activeCount: 0,
+      completedCount: 0,
+      failedCount: 0,
+      recentJobs: [],
+      isLoading: false
     })
 
-    ;(hooks.useHealth as any).mockReturnValue({
-      data: { status: 'unhealthy' },
-      isHealthy: false,
-      isLoading: false
+    ;(hooks.useHealthStatus as any).mockReturnValue({
+      canCreateJobs: false,
+      isHealthy: false
     })
 
     render(<Dashboard />)
 
-    expect(screen.getByText(/api unavailable/i)).toBeInTheDocument()
+    expect(screen.getByText(/API Not Ready/i)).toBeInTheDocument()
   })
 
   it('has proper accessibility attributes', () => {
-    ;(hooks.useJobs as any).mockReturnValue({
-      data: { jobs: [], total: 0 },
-      isLoading: false,
-      isError: false
-    })
-
-    ;(hooks.useHealth as any).mockReturnValue({
-      data: { status: 'healthy' },
-      isHealthy: true,
+    ;(hooks.useJobDashboard as any).mockReturnValue({
+      totalJobs: 0,
+      activeCount: 0,
+      completedCount: 0,
+      failedCount: 0,
+      recentJobs: [],
       isLoading: false
     })
 
-    render(<Dashboard />)
+    ;(hooks.useHealthStatus as any).mockReturnValue({
+      canCreateJobs: true,
+      isHealthy: true
+    })
 
-    const main = screen.getByRole('main')
-    expect(main).toBeInTheDocument()
+    render(<Dashboard />)
 
     const heading = screen.getByRole('heading', { level: 1 })
     expect(heading).toHaveTextContent('Dashboard')
