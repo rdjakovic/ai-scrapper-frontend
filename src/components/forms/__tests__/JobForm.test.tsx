@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '../../../test/utils'
+import { render, screen, waitFor, act } from '../../../test/utils'
 import userEvent from '@testing-library/user-event'
 import JobForm from '../JobForm'
 import { JobFormData } from '../../../schemas/jobSchema'
@@ -28,7 +28,9 @@ describe('JobForm', () => {
 
   describe('without initialValues', () => {
     it('renders form fields correctly with default values', () => {
-      render(<JobForm />)
+      act(() => {
+        render(<JobForm />)
+      })
 
       const urlInput = screen.getByPlaceholderText('https://example.com')
       expect(urlInput).toBeInTheDocument()
@@ -37,7 +39,9 @@ describe('JobForm', () => {
     })
 
     it('uses default values when no initialValues provided', () => {
-      render(<JobForm />)
+      act(() => {
+        render(<JobForm />)
+      })
 
       // Check that URL field starts empty
       const urlInput = screen.getByPlaceholderText('https://example.com')
@@ -66,11 +70,15 @@ describe('JobForm', () => {
       }
     }
 
-    it('renders form with initial values populated', () => {
-      render(<JobForm initialValues={initialValues} />)
+    it('renders form with initial values populated', async () => {
+      act(() => {
+        render(<JobForm initialValues={initialValues} />)
+      })
 
-      // URL should be pre-filled
-      expect(screen.getByDisplayValue('https://initial-example.com')).toBeInTheDocument()
+      // Wait for form to be fully initialized
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('https://initial-example.com')).toBeInTheDocument()
+      })
       
       // Timeout should show initial value in summary
       expect(screen.getByText('60 seconds')).toBeInTheDocument()
@@ -81,16 +89,22 @@ describe('JobForm', () => {
 
     it('preserves initial values when form is reset', async () => {
       const user = userEvent.setup()
-      render(<JobForm initialValues={initialValues} />)
+      act(() => {
+        render(<JobForm initialValues={initialValues} />)
+      })
 
       // Change the URL
       const urlInput = screen.getByDisplayValue('https://initial-example.com')
-      await user.clear(urlInput)
-      await user.type(urlInput, 'https://changed.com')
+      await act(async () => {
+        await user.clear(urlInput)
+        await user.type(urlInput, 'https://changed.com')
+      })
 
       // Reset the form
       const resetButton = screen.getByRole('button', { name: /reset form/i })
-      await user.click(resetButton)
+      await act(async () => {
+        await user.click(resetButton)
+      })
 
       // Should return to initial values
       await waitFor(() => {
@@ -102,10 +116,14 @@ describe('JobForm', () => {
   describe('form validation', () => {
     it('validates required URL field', async () => {
       const user = userEvent.setup()
-      render(<JobForm onSuccess={mockOnSuccess} />)
+      act(() => {
+        render(<JobForm onSuccess={mockOnSuccess} />)
+      })
 
       const submitButton = screen.getByRole('button', { name: /create job/i })
-      await user.click(submitButton)
+      await act(async () => {
+        await user.click(submitButton)
+      })
 
       await waitFor(() => {
         expect(screen.getByText(/url is required/i)).toBeInTheDocument()
@@ -115,13 +133,19 @@ describe('JobForm', () => {
 
     it('validates URL format', async () => {
       const user = userEvent.setup()
-      render(<JobForm onSuccess={mockOnSuccess} />)
+      act(() => {
+        render(<JobForm onSuccess={mockOnSuccess} />)
+      })
 
       const urlInput = screen.getByPlaceholderText('https://example.com')
-      await user.type(urlInput, 'invalid-url')
+      await act(async () => {
+        await user.type(urlInput, 'invalid-url')
+      })
 
       const submitButton = screen.getByRole('button', { name: /create job/i })
-      await user.click(submitButton)
+      await act(async () => {
+        await user.click(submitButton)
+      })
 
       await waitFor(() => {
         expect(screen.getByText(/please enter a valid url/i)).toBeInTheDocument()
@@ -133,13 +157,19 @@ describe('JobForm', () => {
   describe('form submission', () => {
     it('calls onSuccess with job ID on successful submission', async () => {
       const user = userEvent.setup()
-      render(<JobForm onSuccess={mockOnSuccess} />)
+      act(() => {
+        render(<JobForm onSuccess={mockOnSuccess} />)
+      })
 
       const urlInput = screen.getByPlaceholderText('https://example.com')
-      await user.type(urlInput, 'https://example.com')
+      await act(async () => {
+        await user.type(urlInput, 'https://example.com')
+      })
 
       const submitButton = screen.getByRole('button', { name: /create job/i })
-      await user.click(submitButton)
+      await act(async () => {
+        await user.click(submitButton)
+      })
 
       await waitFor(() => {
         expect(mockOnSuccess).toHaveBeenCalledWith('123')
@@ -154,10 +184,14 @@ describe('JobForm', () => {
         javascript: true
       }
       
-      render(<JobForm initialValues={initialValues} onSuccess={mockOnSuccess} />)
+      act(() => {
+        render(<JobForm initialValues={initialValues} onSuccess={mockOnSuccess} />)
+      })
 
       const submitButton = screen.getByRole('button', { name: /create job/i })
-      await user.click(submitButton)
+      await act(async () => {
+        await user.click(submitButton)
+      })
 
       await waitFor(() => {
         expect(mockOnSuccess).toHaveBeenCalledWith('123')
@@ -168,13 +202,19 @@ describe('JobForm', () => {
   describe('form behavior', () => {
     it('shows loading state during submission', async () => {
       const user = userEvent.setup()
-      render(<JobForm />)
+      act(() => {
+        render(<JobForm />)
+      })
 
       const urlInput = screen.getByPlaceholderText('https://example.com')
-      await user.type(urlInput, 'https://example.com')
+      await act(async () => {
+        await user.type(urlInput, 'https://example.com')
+      })
 
       const submitButton = screen.getByRole('button', { name: /create job/i })
-      await user.click(submitButton)
+      await act(async () => {
+        await user.click(submitButton)
+      })
 
       // During submission, button should show "Creating..."
       expect(screen.getByText('Creating...')).toBeInTheDocument()
@@ -182,13 +222,19 @@ describe('JobForm', () => {
 
     it('resets form after successful submission', async () => {
       const user = userEvent.setup()
-      render(<JobForm onSuccess={mockOnSuccess} />)
+      act(() => {
+        render(<JobForm onSuccess={mockOnSuccess} />)
+      })
 
       const urlInput = screen.getByPlaceholderText('https://example.com')
-      await user.type(urlInput, 'https://example.com')
+      await act(async () => {
+        await user.type(urlInput, 'https://example.com')
+      })
 
       const submitButton = screen.getByRole('button', { name: /create job/i })
-      await user.click(submitButton)
+      await act(async () => {
+        await user.click(submitButton)
+      })
 
       await waitFor(() => {
         expect(mockOnSuccess).toHaveBeenCalled()
