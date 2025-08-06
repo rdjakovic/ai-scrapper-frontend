@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '../../test/utils'
-import { Jobs } from '../Jobs'
+import Jobs from '../Jobs'
 
 // Mock the API module
 vi.mock('../../api/jobs', () => ({
