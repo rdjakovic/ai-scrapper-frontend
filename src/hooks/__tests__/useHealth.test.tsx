@@ -5,7 +5,13 @@ import { useHealth } from '../useHealth'
 import * as healthService from '../../services/healthService'
 
 // Mock the health service
-vi.mock('../../services/healthService')
+vi.mock('../../services/healthService', () => ({
+  getHealth: vi.fn(),
+  checkConnectivity: vi.fn(),
+  getHealthMetrics: vi.fn(),
+  isHealthy: vi.fn(),
+  canCreateJobs: vi.fn(),
+}))
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

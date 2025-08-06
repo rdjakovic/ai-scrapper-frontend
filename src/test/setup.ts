@@ -1,7 +1,45 @@
 import '@testing-library/jest-dom'
+import React from 'react'
 import { cleanup } from '@testing-library/react'
-import { afterEach, beforeAll, afterAll, beforeEach } from 'vitest'
+import { afterEach, beforeAll, afterAll, beforeEach, vi } from 'vitest'
 import { server } from './mocks/server'
+import { loadEnv } from 'vite'
+import { TextEncoder, TextDecoder } from 'util'
+
+// Mock ErrorToast component
+vi.mock('../components/ErrorToast', () => ({
+  default: ({ toasts, onDismiss }: any) => {
+    if (!toasts || toasts.length === 0) return null
+    return React.createElement('div', { 'data-testid': 'error-toast' }, 'Mock toast')
+  }
+}))
+
+// Polyfill TextEncoder and TextDecoder for jsdom
+// This fixes the esbuild issue with "TextEncoder" instanceof Uint8Array
+Object.defineProperty(global, 'TextEncoder', {
+  value: TextEncoder,
+  writable: true,
+  configurable: true
+})
+Object.defineProperty(global, 'TextDecoder', {
+  value: TextDecoder,
+  writable: true,
+  configurable: true
+})
+
+// Also set on window for browser compatibility
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'TextEncoder', {
+    value: TextEncoder,
+    writable: true,
+    configurable: true
+  })
+  Object.defineProperty(window, 'TextDecoder', {
+    value: TextDecoder,
+    writable: true,
+    configurable: true
+  })
+}
 
 // Setup MSW
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
@@ -79,3 +117,10 @@ Object.defineProperty(URL, 'revokeObjectURL', {
   writable: true,
   value: () => {}
 })
+
+// Mock import.meta.env for happy-dom
+const env = loadEnv('test', process.cwd(), '')
+if (!(globalThis as any).import) {
+  (globalThis as any).import = {}
+}
+(globalThis as any).import.meta = { env }

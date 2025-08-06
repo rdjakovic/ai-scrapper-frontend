@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '../../test/utils'
-import { ErrorMessage } from '../ErrorMessage'
+import ErrorMessage from '../ErrorMessage'
 
 describe('ErrorMessage', () => {
   it('renders error message correctly', () => {
@@ -14,7 +14,7 @@ describe('ErrorMessage', () => {
     const mockRetry = vi.fn()
     render(<ErrorMessage message="Network error" onRetry={mockRetry} />)
     
-    const retryButton = screen.getByRole('button', { name: /retry/i })
+    const retryButton = screen.getByRole('button', { name: /try again/i })
     expect(retryButton).toBeInTheDocument()
     
     fireEvent.click(retryButton)
@@ -24,7 +24,7 @@ describe('ErrorMessage', () => {
   it('renders without retry button when onRetry is not provided', () => {
     render(<ErrorMessage message="Validation error" />)
     
-    expect(screen.queryByRole('button', { name: /retry/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /try again/i })).not.toBeInTheDocument()
   })
 
   it('has proper accessibility attributes', () => {

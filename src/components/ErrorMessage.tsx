@@ -43,7 +43,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
     <div
       className={`${getVariantClasses()} border rounded-md p-4 ${className}`}
       role="alert"
-      aria-live="polite"
+      aria-live="assertive"
     >
       <div className="flex">
         <div className="flex-shrink-0">

@@ -6,7 +6,9 @@ import { ExportButton } from '../ExportButton'
 vi.mock('../../../utils/exportUtils', () => ({
   exportToJSON: vi.fn(),
   exportToCSV: vi.fn(),
-  downloadFile: vi.fn()
+  downloadFile: vi.fn(),
+  estimateExportSize: vi.fn(),
+  exportJobResult: vi.fn()
 }))
 
 const mockData = {
