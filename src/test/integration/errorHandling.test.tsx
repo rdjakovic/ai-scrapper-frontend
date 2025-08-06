@@ -75,7 +75,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => {
 // Mock components for testing
 import { useErrorHandler } from '../../hooks/useErrorHandler'
 import ErrorMessage from '../../components/ErrorMessage'
-import { HealthIndicator } from '../../components/HealthIndicator'
+import HealthIndicator from '../../components/HealthIndicator'
 import { apiClient } from '../../services'
 
 describe('Error Handling Integration Tests', () => {

@@ -82,7 +82,7 @@ describe('jobService', () => {
         url: 'https://example.com',
         status: 'completed'
       })
-    }
+    })
 
     it('handles job not found', async () => {
       server.use(
