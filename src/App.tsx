@@ -1,7 +1,7 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppLayout, LoadingSpinner } from './components';
-import { Dashboard, CreateJob, Jobs, JobDetail, Results, Health, NotFound } from './pages';
+import { Dashboard, CreateJob, Jobs, JobDetail, CloneJobPage, Results, Health, NotFound } from './pages';
 import { ProtectedRoute } from './components/routing';
 import { performanceMonitor, measurePageLoad } from './utils/performance';
 import { config } from './config/environment';
@@ -58,6 +58,14 @@ function App() {
             element={
               <ProtectedRoute requiresHealthy={true}>
                 <Jobs />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/jobs/:jobId/clone" 
+            element={
+              <ProtectedRoute requiresHealthy={true}>
+                <CloneJobPage />
               </ProtectedRoute>
             } 
           />

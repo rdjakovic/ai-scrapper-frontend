@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useJobs, useCreateJob, useCancelJob, useRetryJob } from './useJobs';
+import { useJobs, useCreateJob, useCancelJob, useRetryJob, useCloneJob } from './useJobs';
 import { useJob } from './useJob';
 import { useResults, usePrefetchResults } from './useResults';
 import { useHealthStatus } from './useHealth';
@@ -18,6 +18,7 @@ export function useJobManagement() {
   const createJobMutation = useCreateJob();
   const cancelJobMutation = useCancelJob();
   const retryJobMutation = useRetryJob();
+  const cloneJobMutation = useCloneJob();
 
   /**
    * Create a new job with optimistic updates and result prefetching
@@ -67,6 +68,26 @@ export function useJobManagement() {
   }, [retryJobMutation, prefetchResults]);
 
   /**
+   * Clone a job
+   */
+  const cloneJob = useCallback(async (jobId: string) => {
+    if (!canCreateJobs) {
+      throw new Error('API is not ready to accept new jobs');
+    }
+
+    try {
+      const newJob = await cloneJobMutation.mutateAsync(jobId);
+      
+      // Prefetch results for the cloned job (they won't be available yet, but this sets up the cache)
+      prefetchResults(newJob.job_id);
+      
+      return newJob;
+    } catch (error) {
+      throw error;
+    }
+  }, [canCreateJobs, cloneJobMutation, prefetchResults]);
+
+  /**
    * Invalidate all job-related queries (useful for manual refresh)
    */
   const refreshAllJobs = useCallback(() => {
@@ -88,6 +109,7 @@ export function useJobManagement() {
     createJob,
     cancelJob,
     retryJob,
+    cloneJob,
     refreshAllJobs,
     prefetchJob,
     
@@ -95,11 +117,13 @@ export function useJobManagement() {
     isCreating: createJobMutation.isPending,
     isCancelling: cancelJobMutation.isPending,
     isRetrying: retryJobMutation.isPending,
+    isCloning: cloneJobMutation.isPending,
     
     // Errors
     createError: createJobMutation.error,
     cancelError: cancelJobMutation.error,
     retryError: retryJobMutation.error,
+    cloneError: cloneJobMutation.error,
     
     // System status
     canCreateJobs,

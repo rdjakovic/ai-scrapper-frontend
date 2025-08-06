@@ -3,14 +3,17 @@ import { Job, JobStatus } from '../types';
 import LoadingSpinner from './LoadingSpinner';
 
 interface JobActionsProps {
-  job: Job;
+  job: Job | null;
   onCancel: () => void;
   onRetry: () => void;
   onViewResults: () => void;
+  onClone: () => void;
   isCancelling: boolean;
   isRetrying: boolean;
+  isCloning: boolean;
   hasResults: boolean;
   isLoadingResults: boolean;
+  isJobLoading?: boolean;
 }
 
 export function JobActions({
@@ -18,17 +21,44 @@ export function JobActions({
   onCancel,
   onRetry,
   onViewResults,
+  onClone,
   isCancelling,
   isRetrying,
+  isCloning,
   hasResults,
-  isLoadingResults
+  isLoadingResults,
+  isJobLoading = false
 }: JobActionsProps) {
+  // If job is not loaded or is loading, disable all actions
+  if (!job || isJobLoading) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h3 className="text-sm font-medium text-gray-900 mb-3">Actions</h3>
+        <div className="flex flex-wrap gap-3">
+          {/* Disabled Clone Button while loading */}
+          <button
+            type="button"
+            disabled={true}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-500 bg-gray-50 cursor-not-allowed transition-colors"
+          >
+            <LoadingSpinner size="sm" className="mr-2" />
+            Loading Job...
+          </button>
+        </div>
+        <div className="mt-3 text-xs text-gray-500">
+          <p>• Actions will be available once job data is loaded</p>
+        </div>
+      </div>
+    );
+  }
+
   const canCancel = job.status === JobStatus.PENDING || job.status === JobStatus.IN_PROGRESS;
   const canRetry = job.status === JobStatus.FAILED || job.status === JobStatus.CANCELLED;
   const canViewResults = job.status === JobStatus.COMPLETED && hasResults;
+  const canClone = job.status !== JobStatus.IN_PROGRESS && !isJobLoading;
   const showNoResults = job.status === JobStatus.COMPLETED && !hasResults;
 
-  if (!canCancel && !canRetry && !canViewResults && !showNoResults) {
+  if (!canCancel && !canRetry && !canViewResults && !canClone && !showNoResults) {
     return null;
   }
 
@@ -109,6 +139,30 @@ export function JobActions({
           </button>
         )}
 
+        {/* Clone Button */}
+        {canClone && (
+          <button
+            type="button"
+            onClick={onClone}
+            disabled={isCloning}
+            className="inline-flex items-center px-4 py-2 border border-purple-300 text-sm font-medium rounded-md text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isCloning ? (
+              <>
+                <LoadingSpinner size="sm" className="mr-2" />
+                Cloning...
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Clone Job
+              </>
+            )}
+          </button>
+        )}
+
         {/* No Results Available Button */}
         {showNoResults && (
           <button
@@ -131,6 +185,9 @@ export function JobActions({
         )}
         {canRetry && (
           <p>• Retry will create a new job with the same configuration</p>
+        )}
+        {canClone && (
+          <p>• Clone will create a copy of this job with the same configuration</p>
         )}
         {job.status === JobStatus.COMPLETED && (
           <p>• View results to see the scraped data and export options</p>

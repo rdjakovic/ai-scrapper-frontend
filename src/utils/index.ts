@@ -90,3 +90,6 @@ export * from './accessibility';
 
 // Export connection error handling utilities
 export * from './connectionErrorHandler';
+
+// Export job utilities
+export * from './jobUtils';

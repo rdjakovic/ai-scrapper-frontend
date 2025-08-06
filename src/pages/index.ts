@@ -5,6 +5,7 @@ export const Dashboard = lazy(() => import('./Dashboard'));
 export const CreateJob = lazy(() => import('./CreateJob'));
 export const Jobs = lazy(() => import('./Jobs'));
 export const JobDetail = lazy(() => import('./JobDetail').then(module => ({ default: module.JobDetail })));
+export const CloneJobPage = lazy(() => import('./CloneJobPage'));
 export const Results = lazy(() => import('./Results'));
 export const Health = lazy(() => import('./Health'));
 export const NotFound = lazy(() => import('./NotFound'));

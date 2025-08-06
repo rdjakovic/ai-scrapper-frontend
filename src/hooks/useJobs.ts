@@ -138,6 +138,24 @@ export function useRetryJob() {
 }
 
 /**
+ * Hook for cloning a job
+ */
+export function useCloneJob() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (jobId: string) => jobService.cloneJob(jobId),
+    onSuccess: (newJob) => {
+      // Add the new job to the cache
+      queryClient.setQueryData(queryKeys.job(newJob.job_id), newJob);
+      
+      // Invalidate job list to show the new cloned job
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobs });
+    },
+  });
+}
+
+/**
  * Hook for getting recent jobs (last 24 hours)
  */
 export function useRecentJobs(limit: number = 50) {

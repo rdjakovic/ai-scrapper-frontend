@@ -206,6 +206,26 @@ export class JobService {
   }
 
   /**
+   * Clone a job by creating a new job with the same configuration
+   */
+  async cloneJob(jobId: string): Promise<Job> {
+    // First get the original job
+    const originalJob = await this.getJob(jobId);
+    
+    // Extract the configuration for clone
+    const cloneJobData: CreateJobRequest = {
+      url: originalJob.url,
+      job_metadata: {
+        ...originalJob.job_metadata,
+        cloned_from: jobId,
+        clone_timestamp: new Date().toISOString()
+      }
+    };
+    
+    return this.createJob(cloneJobData);
+  }
+
+  /**
    * Get jobs by status
    */
   async getJobsByStatus(status: JobStatus, limit?: number): Promise<Job[]> {

@@ -12,9 +12,11 @@ import LoadingSpinner from '../LoadingSpinner';
 interface JobFormProps {
   onSuccess?: (jobId: string) => void;
   className?: string;
+  initialValues?: Partial<JobFormData>;
+  mode?: 'create' | 'clone';
 }
 
-const JobForm: React.FC<JobFormProps> = ({ onSuccess, className = '' }) => {
+const JobForm: React.FC<JobFormProps> = ({ onSuccess, className = '', initialValues, mode = 'create' }) => {
   const navigate = useNavigate();
   const { createJob } = useJobManagement();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,7 +32,7 @@ const JobForm: React.FC<JobFormProps> = ({ onSuccess, className = '' }) => {
   } = useForm<JobFormData>({
     resolver: zodResolver(jobFormSchema),
     mode: 'onChange',
-    defaultValues: {
+    defaultValues: initialValues || {
       url: '',
       timeout: 30,
       javascript: false,
@@ -141,7 +143,7 @@ const JobForm: React.FC<JobFormProps> = ({ onSuccess, className = '' }) => {
               <button
                 type="button"
                 onClick={handleReset}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 disabled={isSubmitting}
               >
                 Reset Form
@@ -160,7 +162,7 @@ const JobForm: React.FC<JobFormProps> = ({ onSuccess, className = '' }) => {
               {isSubmitting && (
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <LoadingSpinner size="sm" />
-                  <span>Creating job...</span>
+                  <span>{mode === 'clone' ? 'Cloning job...' : 'Creating job...'}</span>
                 </div>
               )}
               
@@ -168,14 +170,20 @@ const JobForm: React.FC<JobFormProps> = ({ onSuccess, className = '' }) => {
                 type="submit"
                 disabled={!isValid || isSubmitting}
                 className={`
-                  px-6 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors
+                  inline-flex items-center px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed
                   ${!isValid || isSubmitting
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'border border-gray-300 text-gray-500 bg-gray-50'
+                    : mode === 'clone'
+                    ? 'border border-purple-300 text-purple-700 bg-white hover:bg-purple-50 focus:ring-purple-500'
+                    : 'border border-blue-300 text-blue-700 bg-white hover:bg-blue-50 focus:ring-blue-500'
                   }
                 `}
               >
-                {isSubmitting ? 'Creating...' : 'Create Job'}
+                {isSubmitting && <LoadingSpinner size="sm" className="mr-2" />}
+                {isSubmitting 
+                  ? (mode === 'clone' ? 'Cloning...' : 'Creating...') 
+                  : (mode === 'clone' ? 'Clone Job' : 'Create Job')
+                }
               </button>
             </div>
           </div>

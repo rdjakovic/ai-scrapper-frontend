@@ -5,15 +5,17 @@ import { LoadingSpinner, StatusBadge, ErrorMessage } from '../components';
 import { JobActions } from '../components/JobActions';
 import { JobStatus } from '../types';
 import { formatDistanceToNow, format } from 'date-fns';
+import { useToast } from '../providers/ToastProvider';
 
 export function JobDetail() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
+  const { showError } = useToast();
   
   // Always call hooks at the top level
   const { job, isLoading, error, isActive, isCompleted, isFailed, isCancelled } = useJobMonitor(jobId || '');
   const { results, hasResults, isLoadingResults, resultsError } = useJobResults(jobId || '', job?.status);
-  const { cancelJob, retryJob, isCancelling, isRetrying, cancelError, retryError } = useJobManagement();
+  const { cancelJob, retryJob, cloneJob, isCancelling, isRetrying, isCloning, cancelError, retryError, cloneError } = useJobManagement();
   
   if (!jobId) {
     return (
@@ -42,6 +44,15 @@ export function JobDetail() {
 
   const handleViewResults = () => {
     navigate(`/results/${jobId}`);
+  };
+
+  const handleClone = () => {
+    try {
+      navigate(`/jobs/${jobId}/clone`);
+    } catch (error) {
+      showError('Failed to navigate to clone page. Please try again.');
+      console.error('Navigation error:', error);
+    }
   };
 
   if (isLoading) {
@@ -116,14 +127,17 @@ export function JobDetail() {
         onCancel={handleCancel}
         onRetry={handleRetry}
         onViewResults={handleViewResults}
+        onClone={handleClone}
         isCancelling={isCancelling}
         isRetrying={isRetrying}
+        isCloning={isCloning}
         hasResults={hasResults}
         isLoadingResults={isLoadingResults}
+        isJobLoading={isLoading}
       />
 
       {/* Error Messages */}
-      {(cancelError || retryError) && (
+      {(cancelError || retryError || cloneError) && (
         <div className="space-y-2">
           {cancelError && (
             <ErrorMessage 
@@ -133,6 +147,11 @@ export function JobDetail() {
           {retryError && (
             <ErrorMessage 
               message={`Failed to retry job: ${retryError instanceof Error ? retryError.message : 'Unknown error'}`}
+            />
+          )}
+          {cloneError && (
+            <ErrorMessage 
+              message={`Failed to clone job: ${cloneError instanceof Error ? cloneError.message : 'Unknown error'}`}
             />
           )}
         </div>

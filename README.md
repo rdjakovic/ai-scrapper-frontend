@@ -9,6 +9,9 @@ A modern React TypeScript frontend for the web scraping dashboard.
 - **Code Quality**: ESLint, Prettier, and TypeScript for code quality
 - **Development**: Hot reload, fast builds, and optimized development experience
 - **API Integration**: Configured proxy for local API development
+- **Job Management**: Create, monitor, and clone scraping jobs
+- **Form Validation**: Comprehensive form validation with real-time feedback
+- **Clone Functionality**: Duplicate existing jobs with pre-filled form data
 
 ## Getting Started
 
@@ -81,6 +84,48 @@ The frontend is configured to proxy API requests to `http://localhost:8000` duri
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
 
+## Key Features
+
+### Job Cloning Workflow
+
+The application supports cloning existing jobs to create new ones with pre-filled form data:
+
+1. **Access Clone Function**: Click the "Clone" button on any completed job
+2. **Pre-filled Form**: The clone form automatically populates with:
+   - Original URL
+   - CSS selectors configuration
+   - Advanced options (timeout, JavaScript settings, headers, etc.)
+3. **Edit and Customize**: Modify any fields as needed before creating the new job
+4. **Submit**: Click "Clone Job" to create a new job with the customized settings
+5. **Navigation**: Automatically redirect to the new job's detail page
+
+### Form Validation
+
+- Real-time URL validation with HTTPS indicators
+- CSS selector syntax validation
+- Required field enforcement
+- Error messaging with contextual help
+
+### Testing
+
+Run tests:
+
+```bash
+npm test
+```
+
+Run tests in watch mode:
+
+```bash
+npm run test:watch
+```
+
+The test suite includes:
+- Unit tests for utility functions like `mapJobToFormData`
+- Integration tests for the complete clone workflow
+- Form validation and error handling tests
+- Accessibility and UX tests
+
 ## Development Guidelines
 
 - Use TypeScript for all new files
@@ -88,3 +133,5 @@ The frontend is configured to proxy API requests to `http://localhost:8000` duri
 - Use Tailwind CSS classes for styling
 - Write meaningful commit messages
 - Run linting and formatting before committing
+- Write tests for new functionality
+- Follow React best practices and hooks patterns
