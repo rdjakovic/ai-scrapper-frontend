@@ -12,6 +12,11 @@ const Header: React.FC<HeaderProps> = ({
   sidebarOpen = false, 
   isMobile = false 
 }) => {
+  const handleMenuToggle = () => {
+    if (onMenuToggle) {
+      onMenuToggle();
+    }
+  };
 
   return (
     <header 
@@ -22,15 +27,20 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex justify-between items-center h-16">
           {/* Mobile menu button and Logo/Title */}
           <div className="flex items-center space-x-4">
-            {isMobile && (
-              <button
-                type="button"
-                onClick={onMenuToggle}
-                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors"
-                aria-expanded={sidebarOpen}
-                aria-controls="sidebar-navigation"
-                aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              >
+            {/* Show hamburger menu on mobile - use both JS detection and CSS classes as fallback */}
+            <button
+              type="button"
+              onClick={handleMenuToggle}
+              className={`
+                p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 
+                focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 
+                transition-colors md:hidden
+                ${isMobile ? 'block' : 'hidden md:hidden'}
+              `}
+              aria-expanded={sidebarOpen}
+              aria-controls="sidebar-navigation"
+              aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            >
                 <span className="sr-only">
                   {sidebarOpen ? 'Close menu' : 'Open menu'}
                 </span>
@@ -43,8 +53,7 @@ const Header: React.FC<HeaderProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 )}
-              </button>
-            )}
+            </button>
             
             <div className="flex items-center">
               <h1 className={`

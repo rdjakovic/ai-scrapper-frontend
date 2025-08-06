@@ -117,12 +117,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, []);
 
-  // Close sidebar on route change (mobile only)
-  useEffect(() => {
-    if (isMobile && onClose) {
-      onClose();
-    }
-  }, [location.pathname, isMobile, onClose]);
 
   return (
     <aside 

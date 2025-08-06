@@ -24,9 +24,23 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     };
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    const debouncedCheckMobile = debounce(checkMobile, 150);
+    window.addEventListener('resize', debouncedCheckMobile);
+    return () => window.removeEventListener('resize', debouncedCheckMobile);
   }, []);
+
+  // Simple debounce function
+  const debounce = (func: Function, wait: number) => {
+    let timeout: NodeJS.Timeout;
+    return function executedFunction(...args: any[]) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
 
   // Handle keyboard navigation
   useEffect(() => {
