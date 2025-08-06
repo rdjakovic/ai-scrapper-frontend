@@ -4,7 +4,7 @@ const API_BASE_URL = 'http://localhost:8000'
 
 export const handlers = [
   // Jobs endpoints
-  http.get(`${API_BASE_URL}/jobs`, () => {
+  http.get(`${API_BASE_URL}/api/v1/jobs`, () => {
     return HttpResponse.json({
       jobs: [
         {
@@ -62,7 +62,7 @@ export const handlers = [
     })
   }),
 
-  http.post(`${API_BASE_URL}/jobs`, async ({ request }) => {
+  http.post(`${API_BASE_URL}/api/v1/jobs`, async ({ request }) => {
     const body = await request.json()
     return HttpResponse.json({
       job_id: '4',
@@ -82,7 +82,28 @@ export const handlers = [
     })
   }),
 
-  http.get(`${API_BASE_URL}/jobs/:id`, ({ params }) => {
+  // POST /api/v1/scrape endpoint for job creation and retry
+  http.post(`${API_BASE_URL}/api/v1/scrape`, async ({ request }) => {
+    const body = await request.json()
+    return HttpResponse.json({
+      job_id: '4',
+      url: (body as any).url,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      completed_at: null,
+      error_message: null,
+      job_metadata: {
+        priority: 'normal',
+        retries: 0,
+        ...(body as any).job_metadata,
+      },
+      result: null,
+      data: null,
+    })
+  }),
+
+  http.get(`${API_BASE_URL}/api/v1/scrape/:id`, ({ params }) => {
     const { id } = params
     return HttpResponse.json({
       job_id: id,
@@ -107,7 +128,7 @@ export const handlers = [
     })
   }),
 
-  http.delete(`${API_BASE_URL}/jobs/:id`, () => {
+  http.delete(`${API_BASE_URL}/api/v1/scrape/:id`, () => {
     return HttpResponse.json({ message: 'Job deleted successfully' })
   }),
 
@@ -136,6 +157,18 @@ export const handlers = [
 
   // Health check
   http.get(`${API_BASE_URL}/health`, () => {
+    return HttpResponse.json({ 
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      database: 'connected',
+      redis: 'connected',
+      version: '1.0.0',
+      uptime: 3600,
+    })
+  }),
+
+  // Add API v1 health endpoint
+  http.get(`${API_BASE_URL}/api/v1/health`, () => {
     return HttpResponse.json({ 
       status: 'healthy',
       timestamp: new Date().toISOString(),

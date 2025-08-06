@@ -1,16 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '../utils'
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { ToastProvider } from '../../providers/ToastProvider'
 import App from '../../App'
+import { apiClient } from '../../services'
 
 // Mock the API client
-vi.mock('../../services/api', () => ({
+vi.mock('../../services', () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
+    put: vi.fn(),
     delete: vi.fn(),
+    requestWithRetry: vi.fn(),
   }
 }))
 
@@ -67,7 +70,7 @@ describe('End-to-End User Workflows', () => {
   let mockApiClient: any
 
   beforeEach(() => {
-    mockApiClient = vi.mocked(require('../../services/api').apiClient)
+    mockApiClient = vi.mocked(apiClient)
     
     // Reset all mocks
     mockApiClient.get.mockReset()
@@ -111,7 +114,7 @@ describe('End-to-End User Workflows', () => {
         updated_at: new Date().toISOString()
       })
 
-      render(
+      rtlRender(
         <TestWrapper>
           <App />
         </TestWrapper>
@@ -148,7 +151,7 @@ describe('End-to-End User Workflows', () => {
     })
 
     it('should show validation errors for invalid input', async () => {
-      render(
+      rtlRender(
         <TestWrapper>
           <App />
         </TestWrapper>
@@ -213,7 +216,7 @@ describe('End-to-End User Workflows', () => {
         return Promise.reject(new Error('Not found'))
       })
 
-      render(
+      rtlRender(
         <TestWrapper>
           <App />
         </TestWrapper>
@@ -267,7 +270,7 @@ describe('End-to-End User Workflows', () => {
         return Promise.reject(new Error('Not found'))
       })
 
-      render(
+      rtlRender(
         <TestWrapper>
           <App />
         </TestWrapper>
@@ -328,7 +331,7 @@ describe('End-to-End User Workflows', () => {
         return Promise.reject(new Error('Not found'))
       })
 
-      render(
+      rtlRender(
         <TestWrapper>
           <App />
         </TestWrapper>
@@ -391,7 +394,7 @@ describe('End-to-End User Workflows', () => {
         value: mockRemoveChild
       })
 
-      render(
+      rtlRender(
         <TestWrapper>
           <App />
         </TestWrapper>

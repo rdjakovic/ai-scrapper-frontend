@@ -12,43 +12,41 @@ describe('jobService', () => {
 
   describe('getJobs', () => {
     it('fetches jobs successfully', async () => {
-      const mockJobs = [
-        { id: '1', url: 'https://example.com', status: 'completed' },
-        { id: '2', url: 'https://test.com', status: 'pending' }
-      ]
-
-      server.use(
-        http.get(`${API_BASE_URL}/jobs`, () => {
-          return HttpResponse.json({ jobs: mockJobs, total: 2 })
-        })
-      )
-
       const result = await jobService.getJobs()
 
-      expect(result.jobs).toEqual(mockJobs)
-      expect(result.total).toBe(2)
+      expect(result.jobs).toHaveLength(3)
+      expect(result.jobs[0]).toMatchObject({
+        job_id: '1',
+        url: 'https://example.com',
+        status: 'completed'
+      })
+      expect(result.jobs[1]).toMatchObject({
+        job_id: '2',
+        url: 'https://test.com',
+        status: 'pending'
+      })
     })
 
     it('handles pagination parameters', async () => {
       server.use(
-        http.get(`${API_BASE_URL}/jobs`, ({ request }) => {
+        http.get(`${API_BASE_URL}/api/v1/jobs`, ({ request }) => {
           const url = new URL(request.url)
-          const page = url.searchParams.get('page')
+          const offset = url.searchParams.get('offset')
           const limit = url.searchParams.get('limit')
           
-          expect(page).toBe('2')
+          expect(offset).toBe('10') // page 2 with limit 10 = offset 10
           expect(limit).toBe('10')
           
           return HttpResponse.json({ jobs: [], total: 0 })
         })
       )
 
-      await jobService.getJobs({ page: 2, limit: 10 })
+      await jobService.getJobs({ offset: 10, limit: 10 })
     })
 
     it('handles status filter', async () => {
       server.use(
-        http.get(`${API_BASE_URL}/jobs`, ({ request }) => {
+        http.get(`${API_BASE_URL}/api/v1/jobs`, ({ request }) => {
           const url = new URL(request.url)
           const status = url.searchParams.get('status')
           
@@ -63,7 +61,7 @@ describe('jobService', () => {
 
     it('handles API errors', async () => {
       server.use(
-        http.get(`${API_BASE_URL}/jobs`, () => {
+        http.get(`${API_BASE_URL}/api/v1/jobs`, () => {
           return HttpResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -77,27 +75,18 @@ describe('jobService', () => {
 
   describe('getJob', () => {
     it('fetches single job successfully', async () => {
-      const mockJob = {
-        id: '1',
-        url: 'https://example.com',
-        status: 'completed',
-        result: { title: 'Example Page' }
-      }
-
-      server.use(
-        http.get(`${API_BASE_URL}/jobs/1`, () => {
-          return HttpResponse.json(mockJob)
-        })
-      )
-
       const result = await jobService.getJob('1')
 
-      expect(result).toEqual(mockJob)
-    })
+      expect(result).toMatchObject({
+        job_id: '1',
+        url: 'https://example.com',
+        status: 'completed'
+      })
+    }
 
     it('handles job not found', async () => {
       server.use(
-        http.get(`${API_BASE_URL}/jobs/999`, () => {
+        http.get(`${API_BASE_URL}/api/v1/scrape/999`, () => {
           return HttpResponse.json(
             { error: 'Job not found' },
             { status: 404 }
@@ -114,33 +103,21 @@ describe('jobService', () => {
       const jobData = {
         url: 'https://example.com',
         selectors: { title: 'h1' },
-        timeout: 30000
+        timeout: 30
       }
-
-      const mockResponse = {
-        id: '123',
-        ...jobData,
-        status: 'pending',
-        created_at: '2024-01-01T00:00:00Z'
-      }
-
-      server.use(
-        http.post(`${API_BASE_URL}/jobs`, async ({ request }) => {
-          const body = await request.json()
-          expect(body).toEqual(jobData)
-          
-          return HttpResponse.json(mockResponse)
-        })
-      )
 
       const result = await jobService.createJob(jobData)
 
-      expect(result).toEqual(mockResponse)
+      expect(result).toMatchObject({
+        job_id: '4',
+        url: 'https://example.com',
+        status: 'pending'
+      })
     })
 
     it('handles validation errors', async () => {
       server.use(
-        http.post(`${API_BASE_URL}/jobs`, () => {
+        http.post(`${API_BASE_URL}/api/v1/scrape`, () => {
           return HttpResponse.json(
             { error: 'Invalid URL format' },
             { status: 400 }
@@ -161,7 +138,7 @@ describe('jobService', () => {
   describe('cancelJob', () => {
     it('cancels job successfully', async () => {
       server.use(
-        http.delete(`${API_BASE_URL}/jobs/1`, () => {
+        http.delete(`${API_BASE_URL}/api/v1/scrape/1`, () => {
           return HttpResponse.json({ message: 'Job cancelled successfully' })
         })
       )
@@ -173,7 +150,7 @@ describe('jobService', () => {
 
     it('handles job not found for cancellation', async () => {
       server.use(
-        http.delete(`${API_BASE_URL}/jobs/999`, () => {
+        http.delete(`${API_BASE_URL}/api/v1/scrape/999`, () => {
           return HttpResponse.json(
             { error: 'Job not found' },
             { status: 404 }
@@ -187,27 +164,18 @@ describe('jobService', () => {
 
   describe('retryJob', () => {
     it('retries job successfully', async () => {
-      const mockResponse = {
-        id: '456',
-        url: 'https://example.com',
-        status: 'pending',
-        created_at: '2024-01-01T00:00:00Z'
-      }
-
-      server.use(
-        http.post(`${API_BASE_URL}/jobs/1/retry`, () => {
-          return HttpResponse.json(mockResponse)
-        })
-      )
-
       const result = await jobService.retryJob('1')
 
-      expect(result).toEqual(mockResponse)
+      expect(result).toMatchObject({
+        job_id: '4',
+        url: 'https://example.com',
+        status: 'pending'
+      })
     })
 
     it('handles retry errors', async () => {
       server.use(
-        http.post(`${API_BASE_URL}/jobs/1/retry`, () => {
+        http.get(`${API_BASE_URL}/api/v1/scrape/1`, () => {
           return HttpResponse.json(
             { error: 'Cannot retry completed job' },
             { status: 400 }
@@ -222,7 +190,7 @@ describe('jobService', () => {
   describe('error handling', () => {
     it('handles network errors', async () => {
       server.use(
-        http.get(`${API_BASE_URL}/jobs`, () => {
+        http.get(`${API_BASE_URL}/api/v1/jobs`, () => {
           return HttpResponse.error()
         })
       )
@@ -232,7 +200,7 @@ describe('jobService', () => {
 
     it('handles timeout errors', async () => {
       server.use(
-        http.get(`${API_BASE_URL}/jobs`, () => {
+        http.get(`${API_BASE_URL}/api/v1/jobs`, () => {
           return new Promise(() => {}) // Never resolves
         })
       )

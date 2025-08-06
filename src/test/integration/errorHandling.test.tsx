@@ -1,16 +1,18 @@
 import React from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '../utils'
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { ToastProvider } from '../../providers/ToastProvider'
 
 // Mock API client
-vi.mock('../../services/api', () => ({
+vi.mock('../../services', () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
+    put: vi.fn(),
     delete: vi.fn(),
+    requestWithRetry: vi.fn(),
   }
 }))
 
@@ -74,12 +76,13 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => {
 import { useErrorHandler } from '../../hooks/useErrorHandler'
 import ErrorMessage from '../../components/ErrorMessage'
 import { HealthIndicator } from '../../components/HealthIndicator'
+import { apiClient } from '../../services'
 
 describe('Error Handling Integration Tests', () => {
   let mockApiClient: any
 
   beforeEach(() => {
-    mockApiClient = vi.mocked(require('../../services/api').apiClient)
+    mockApiClient = vi.mocked(apiClient)
     
     // Reset all mocks
     mockApiClient.get.mockReset()
@@ -101,7 +104,7 @@ describe('Error Handling Integration Tests', () => {
       networkError.name = 'NetworkError'
       mockApiClient.get.mockRejectedValue(networkError)
 
-      render(
+      rtlRender(
         <TestWrapper>
           <HealthIndicator />
         </TestWrapper>
@@ -121,7 +124,7 @@ describe('Error Handling Integration Tests', () => {
       timeoutError.name = 'TimeoutError'
       mockApiClient.get.mockRejectedValue(timeoutError)
 
-      render(
+      rtlRender(
         <TestWrapper>
           <HealthIndicator />
         </TestWrapper>
@@ -137,7 +140,7 @@ describe('Error Handling Integration Tests', () => {
       dnsError.name = 'DNSError'
       mockApiClient.get.mockRejectedValue(dnsError)
 
-      render(
+      rtlRender(
         <TestWrapper>
           <HealthIndicator />
         </TestWrapper>
@@ -173,7 +176,7 @@ describe('Error Handling Integration Tests', () => {
         return <button onClick={handleSubmit}>Submit</button>
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <TestComponent />
         </TestWrapper>
@@ -195,7 +198,7 @@ describe('Error Handling Integration Tests', () => {
       }
       mockApiClient.get.mockRejectedValue(unauthorizedError)
 
-      render(
+      rtlRender(
         <TestWrapper>
           <HealthIndicator />
         </TestWrapper>
@@ -215,7 +218,7 @@ describe('Error Handling Integration Tests', () => {
       }
       mockApiClient.get.mockRejectedValue(forbiddenError)
 
-      render(
+      rtlRender(
         <TestWrapper>
           <HealthIndicator />
         </TestWrapper>
@@ -235,7 +238,7 @@ describe('Error Handling Integration Tests', () => {
       }
       mockApiClient.get.mockRejectedValue(notFoundError)
 
-      render(
+      rtlRender(
         <TestWrapper>
           <HealthIndicator />
         </TestWrapper>
@@ -277,7 +280,7 @@ describe('Error Handling Integration Tests', () => {
         return <button onClick={handleSubmit}>Submit</button>
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <TestComponent />
         </TestWrapper>
@@ -299,7 +302,7 @@ describe('Error Handling Integration Tests', () => {
       }
       mockApiClient.get.mockRejectedValue(serverError)
 
-      render(
+      rtlRender(
         <TestWrapper>
           <HealthIndicator />
         </TestWrapper>
@@ -322,7 +325,7 @@ describe('Error Handling Integration Tests', () => {
       }
       mockApiClient.get.mockRejectedValue(serviceUnavailableError)
 
-      render(
+      rtlRender(
         <TestWrapper>
           <HealthIndicator />
         </TestWrapper>
@@ -340,7 +343,7 @@ describe('Error Handling Integration Tests', () => {
         throw new Error('Component error')
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <ThrowingComponent />
         </TestWrapper>
@@ -374,7 +377,7 @@ describe('Error Handling Integration Tests', () => {
         return <div>Loading...</div>
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <AsyncErrorComponent />
         </TestWrapper>
@@ -419,7 +422,7 @@ describe('Error Handling Integration Tests', () => {
         )
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <FormWithValidation />
         </TestWrapper>
@@ -493,7 +496,7 @@ describe('Error Handling Integration Tests', () => {
         )
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <FormWithServerValidation />
         </TestWrapper>
@@ -544,7 +547,7 @@ describe('Error Handling Integration Tests', () => {
         )
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <RetryComponent />
         </TestWrapper>
@@ -593,7 +596,7 @@ describe('Error Handling Integration Tests', () => {
         )
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <RetryComponent />
         </TestWrapper>
@@ -652,7 +655,7 @@ describe('Error Handling Integration Tests', () => {
         return <div>Loading...</div>
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <RecoveryComponent />
         </TestWrapper>
@@ -688,7 +691,7 @@ describe('Error Handling Integration Tests', () => {
         return <div>Component with error logging</div>
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <ErrorLoggingComponent />
         </TestWrapper>
@@ -726,7 +729,7 @@ describe('Error Handling Integration Tests', () => {
         return <div>Component with error reporting</div>
       }
 
-      render(
+      rtlRender(
         <TestWrapper>
           <ErrorReportingComponent />
         </TestWrapper>

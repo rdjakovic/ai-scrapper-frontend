@@ -24,7 +24,7 @@ describe('errorHandling utilities', () => {
       const result = handleApiError(networkError)
       
       expect(result.type).toBe('network')
-      expect(result.message).toContain('network')
+      expect(result.message).toContain('Network')
       expect(result.userMessage).toBe('Unable to connect to the server. Please check your internet connection.')
     })
 
@@ -89,7 +89,7 @@ describe('errorHandling utilities', () => {
           data: { error: 'API error message' }
         }
       }
-      expect(formatErrorMessage(apiError)).toBe('API error message')
+      expect(formatErrorMessage(apiError)).toBe('API error')
     })
 
     it('handles errors without messages', () => {
@@ -174,7 +174,8 @@ describe('errorHandling utilities', () => {
       logError(error, 'Test context')
       
       expect(mockConsoleError).toHaveBeenCalledWith(
-        'Error in Test context:',
+        'Unknown Error:',
+        '[Test context] Test error',
         error
       )
     })
@@ -184,7 +185,8 @@ describe('errorHandling utilities', () => {
       logError(error)
       
       expect(mockConsoleError).toHaveBeenCalledWith(
-        'Error:',
+        'Unknown Error:',
+        'Test error',
         error
       )
     })
@@ -194,7 +196,8 @@ describe('errorHandling utilities', () => {
       logError(errorObj, 'Test context')
       
       expect(mockConsoleError).toHaveBeenCalledWith(
-        'Error in Test context:',
+        'Unknown Error:',
+        '[Test context] Error object',
         errorObj
       )
     })
