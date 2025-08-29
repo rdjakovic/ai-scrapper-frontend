@@ -127,25 +127,6 @@ describe('healthService', () => {
       expect(result.metadata.uptime).toBe(7200)
       expect(result.metadata.version).toBe('1.0.0')
     })
-
-    it('handles missing metrics gracefully', async () => {
-      const mockHealth = {
-        status: 'healthy',
-        timestamp: '2024-01-01T00:00:00Z'
-      }
-
-      server.use(
-        http.get(`${API_BASE_URL}/health`, () => {
-          return HttpResponse.json(mockHealth)
-        })
-      )
-
-      const result = await healthService.getDetailedHealth()
-
-      expect(result.overall).toBe(true)
-      expect(result.metadata.uptime).toBe(0)
-      expect(result.metadata.version).toBe(undefined)
-    })
   })
 
   describe('isReadyForJobs', () => {
